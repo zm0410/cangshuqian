@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仓鼠签 - 简约高效的导航网站</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>仓鼠签</h1>
+            <div class="header-controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索...">
+                    <button id="searchBtn">搜索</button>
+                </div>
+                <button id="themeToggle" class="theme-toggle">🌙</button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="folder-tree" id="folderTree">
+                    <!-- 文件夹树将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <div class="breadcrumb" id="breadcrumb">
+                    <button id="backButton" class="back-button" disabled>←</button>
+                    <!-- 面包屑导航将通过JavaScript动态生成 -->
+                </div>
+                
+                <div class="items-container" id="itemsContainer">
+                    <!-- 内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/tree.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

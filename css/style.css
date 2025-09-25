@@ -39,6 +39,8 @@ body.dark-mode {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     animation: fadeInDown 0.5s ease-out;
+    flex-wrap: wrap; /* 允许换行 */
+    gap: 8px; /* 添加元素间距 */
 }
 
 .header.dark-mode {
@@ -47,23 +49,33 @@ body.dark-mode {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.header h1 {
+    font-size: 1.5rem;
+    white-space: nowrap;
+}
+
 .header-controls {
     display: flex;
     align-items: center;
     gap: 8px; /* 减少控件间距 */
+    flex-wrap: wrap;
+    min-width: 0; /* 允许搜索框收缩 */
 }
 
 .search-box {
     display: flex;
     gap: 8px; /* 减少搜索框内元素间距 */
     padding: 8px 0;
+    flex: 1;
+    min-width: 0; /* 允许搜索框收缩 */
 }
 
 .search-box input {
     padding: 6px 10px; /* 减少输入框内边距 */
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
-    width: 200px; /* 减少输入框宽度 */
+    width: 100%; /* 调整为100%宽度 */
+    min-width: 0; /* 允许收缩 */
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
@@ -89,6 +101,18 @@ body.dark-mode {
     box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.3);
 }
 
+.search-box input::-webkit-input-placeholder {
+    font-size: 13px;
+}
+
+.search-box input::-moz-placeholder {
+    font-size: 13px;
+}
+
+.search-box input:-ms-input-placeholder {
+    font-size: 13px;
+}
+
 .search-box button {
     padding: 6px 12px; /* 减少按钮内边距 */
     background: rgba(255, 255, 255, 0.8);
@@ -102,6 +126,7 @@ body.dark-mode {
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out 0.1s both;
     font-size: 14px; /* 调整字体大小 */
+    white-space: nowrap;
 }
 
 .search-box button:hover {
@@ -145,6 +170,7 @@ body.dark-mode {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out 0.2s both;
+    flex-shrink: 0; /* 防止按钮收缩 */
 }
 
 .theme-toggle:hover {
@@ -224,6 +250,7 @@ body.dark-mode {
     transition: all 0.2s ease;
     animation: fadeIn 0.3s ease-out;
     font-size: 14px; /* 调整字体大小 */
+    min-height: 36px; /* 增加最小高度，便于触摸 */
 }
 
 .tree-item:hover {
@@ -264,6 +291,7 @@ body.dark-mode {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .tree-item .toggle {
@@ -274,6 +302,7 @@ body.dark-mode {
     justify-content: center;
     font-size: 10px; /* 调整切换按钮字体大小 */
     transition: transform 0.2s ease;
+    flex-shrink: 0;
 }
 
 .tree-item .toggle:hover {
@@ -355,6 +384,10 @@ body.dark-mode {
     transition: all 0.2s ease;
     animation: slideInLeft 0.3s ease-out;
     white-space: nowrap; /* 防止按钮文字换行 */
+    min-height: 32px; /* 增加最小高度，便于触摸 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .back-button:hover:not(:disabled) {
@@ -394,6 +427,9 @@ body.dark-mode {
     animation: fadeIn 0.3s ease-out;
     font-size: 13px; /* 调整字体大小 */
     white-space: nowrap; /* 防止文字换行 */
+    min-height: 32px; /* 增加最小高度，便于触摸 */
+    display: flex;
+    align-items: center;
 }
 
 .breadcrumb-item:hover {
@@ -445,6 +481,7 @@ body.dark-mode {
     gap: 12px; /* 减少元素间距 */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     animation: slideInUp 0.4s ease-out;
+    min-height: 56px; /* 增加最小高度，便于触摸 */
 }
 
 .item-row:hover {
@@ -493,18 +530,21 @@ body.dark-mode {
     display: flex;
     flex-direction: column;
     gap: 4px; /* 减少元素间距 */
+    min-width: 0; /* 允许内容收缩 */
 }
 
 .item-title {
     font-weight: 600;
     font-size: 15px; /* 调整字体大小 */
     animation: fadeIn 0.3s ease-out;
+    word-break: break-word; /* 允许标题换行 */
 }
 
 .item-description {
     font-size: 13px; /* 调整字体大小 */
     color: #666;
     animation: fadeIn 0.3s ease-out 0.1s both;
+    word-break: break-word; /* 允许描述换行 */
 }
 
 .item-description.dark-mode {
@@ -669,173 +709,334 @@ mark.dark-mode {
 /* 响应式设计 */
 @media (max-width: 768px) {
     .main-content {
-        flex-direction: column;
-        padding: 5px; /* 进一步减少内边距 */
+        flex-direction: row;
+        padding: 5px;
+        height: calc(100% - 60px);
     }
     
     .header {
-        padding: 8px 10px; /* 进一步减少头部内边距 */
+        padding: 8px 10px;
+        gap: 6px;
+    }
+    
+    .header h1 {
+        font-size: 1.3rem;
     }
     
     .header-controls {
-        gap: 5px; /* 进一步减少控件间距 */
-    }
-    
-    .sidebar {
+        gap: 5px;
         width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-        max-height: 180px; /* 调整侧边栏最大高度 */
-        margin-right: 0;
-        margin-bottom: 8px; /* 调整下边距 */
-        padding: 5px 0; /* 减少内边距 */
-    }
-    
-    .sidebar.dark-mode {
-        border-bottom: 1px solid #444;
-    }
-    
-    .folder-tree {
-        padding: 0 5px; /* 减少内边距 */
-    }
-    
-    .tree-node ul {
-        margin-left: 12px; /* 减少子节点左边距 */
-    }
-    
-    .tree-item {
-        padding: 5px 6px; /* 减少内边距 */
-        gap: 5px; /* 减少元素间距 */
-        font-size: 13px; /* 调整字体大小 */
-    }
-    
-    .content-header {
-        padding: 0 5px; /* 进一步减少内边距 */
-        gap: 5px; /* 进一步减少元素间距 */
-    }
-    
-    .breadcrumb {
-        gap: 5px; /* 进一步减少元素间距 */
-        padding: 3px 0; /* 进一步减少内边距 */
-    }
-    
-    .back-button {
-        padding: 3px 6px; /* 进一步减少内边距 */
-        font-size: 12px; /* 调整字体大小 */
-    }
-    
-    .breadcrumb-item {
-        padding: 2px 5px; /* 进一步减少内边距 */
-        font-size: 12px; /* 调整字体大小 */
-    }
-    
-    .breadcrumb-separator {
-        font-size: 12px; /* 调整字体大小 */
-    }
-    
-    .items-container {
-        padding: 5px; /* 进一步减少内边距 */
-        gap: 5px; /* 进一步减少元素间距 */
-    }
-    
-    .item-row {
-        padding: 10px; /* 进一步减少内边距 */
-        gap: 10px; /* 进一步减少元素间距 */
-    }
-    
-    .item-icon {
-        width: 24px; /* 进一步减少图标大小 */
-        height: 24px;
-        font-size: 18px; /* 调整字体大小 */
-    }
-    
-    .item-favicon {
-        width: 18px; /* 进一步减少favicon大小 */
-        height: 18px;
-    }
-    
-    .item-info {
-        gap: 3px; /* 进一步减少元素间距 */
-    }
-    
-    .item-title {
-        font-size: 14px; /* 调整字体大小 */
-    }
-    
-    .item-description {
-        font-size: 12px; /* 调整字体大小 */
-    }
-    
-    .item-url {
-        font-size: 11px; /* 调整字体大小 */
     }
     
     .search-box {
         width: 100%;
-        padding: 5px 0; /* 减少内边距 */
-        gap: 5px; /* 减少元素间距 */
+        padding: 5px 0;
+        gap: 5px;
     }
     
     .search-box input {
         width: 100%;
-        padding: 5px 8px; /* 减少内边距 */
-        font-size: 13px; /* 调整字体大小 */
+        padding: 8px 10px;
+        font-size: 14px;
+        min-height: 36px;
+    }
+    
+    .search-box input::-webkit-input-placeholder {
+        font-size: 12px;
+    }
+    
+    .search-box input::-moz-placeholder {
+        font-size: 12px;
+    }
+    
+    .search-box input:-ms-input-placeholder {
+        font-size: 12px;
     }
     
     .search-box button {
-        padding: 5px 10px; /* 减少内边距 */
-        font-size: 13px; /* 调整字体大小 */
+        padding: 8px 12px;
+        font-size: 14px;
+        min-height: 36px;
+    }
+    
+    .sidebar {
+        width: 50%;
+        border-right: 1px solid #ddd;
+        border-bottom: none;
+        max-height: 100%;
+        margin-right: 5px;
+        margin-bottom: 0;
+        padding: 5px 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .sidebar.dark-mode {
+        border-right: 1px solid #444;
+    }
+    
+    .folder-tree {
+        padding: 0 5px;
+        overflow-y: auto;
+        flex: 1;
+    }
+    
+    .tree-node ul {
+        margin-left: 12px;
+    }
+    
+    .tree-item {
+        padding: 8px 10px;
+        gap: 8px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+    
+    .content-area {
+        width: 50%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .content-header {
+        padding: 0 5px;
+        gap: 5px;
+    }
+    
+    .breadcrumb {
+        gap: 5px;
+        padding: 3px 0;
+    }
+    
+    .back-button {
+        padding: 6px 10px;
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    .breadcrumb-item {
+        padding: 6px 8px;
+        font-size: 13px;
+        min-height: 36px;
+    }
+    
+    .breadcrumb-separator {
+        font-size: 13px;
+    }
+    
+    .items-container {
+        padding: 5px;
+        gap: 6px;
+        flex: 1;
+        overflow-y: auto;
+    }
+    
+    .item-row {
+        padding: 12px;
+        gap: 12px;
+        min-height: 60px;
+    }
+    
+    .item-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 20px;
+    }
+    
+    .item-favicon {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .item-info {
+        gap: 4px;
+    }
+    
+    .item-title {
+        font-size: 15px;
+    }
+    
+    .item-description {
+        font-size: 13px;
+    }
+    
+    .item-url {
+        font-size: 12px;
     }
     
     .theme-toggle {
-        width: 32px; /* 调整按钮大小 */
-        height: 32px;
-        font-size: 1rem; /* 调整图标大小 */
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
     }
 }
 
 /* 小屏幕设备优化 */
 @media (max-width: 480px) {
     .header {
-        padding: 6px 8px; /* 进一步减少内边距 */
+        padding: 6px 8px;
+        gap: 4px;
     }
     
     .header h1 {
-        font-size: 1.2rem; /* 调整标题字体大小 */
+        font-size: 1.2rem;
     }
     
     .sidebar {
-        max-height: 150px; /* 调整侧边栏最大高度 */
+        max-height: 100%;
     }
     
     .tree-item {
-        padding: 4px 5px; /* 进一步减少内边距 */
-        font-size: 12px; /* 调整字体大小 */
+        padding: 6px 8px;
+        font-size: 13px;
+        min-height: 36px;
     }
     
     .item-row {
-        padding: 8px; /* 进一步减少内边距 */
+        padding: 10px;
+        min-height: 56px;
     }
     
     .item-title {
-        font-size: 13px; /* 调整字体大小 */
+        font-size: 14px;
     }
     
     .item-description {
-        font-size: 11px; /* 调整字体大小 */
+        font-size: 12px;
     }
     
     .item-url {
-        font-size: 10px; /* 调整字体大小 */
+        font-size: 11px;
     }
     
     .back-button {
-        padding: 2px 5px; /* 进一步减少内边距 */
-        font-size: 11px; /* 调整字体大小 */
+        padding: 5px 8px;
+        font-size: 12px;
+        min-height: 32px;
     }
     
     .breadcrumb-item {
-        padding: 1px 4px; /* 进一步减少内边距 */
-        font-size: 11px; /* 调整字体大小 */
+        padding: 4px 6px;
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .search-box input {
+        padding: 6px 8px;
+        font-size: 13px;
+        min-height: 32px;
+    }
+    
+    .search-box input::-webkit-input-placeholder {
+        font-size: 11px;
+    }
+    
+    .search-box input::-moz-placeholder {
+        font-size: 11px;
+    }
+    
+    .search-box input:-ms-input-placeholder {
+        font-size: 11px;
+    }
+    
+    .search-box button {
+        padding: 6px 10px;
+        font-size: 13px;
+        min-height: 32px;
+    }
+    
+    .theme-toggle {
+        width: 36px;
+        height: 36px;
+        font-size: 1.1rem;
+    }
+}
+
+/* 超小屏幕设备优化 */
+@media (max-width: 360px) {
+    .header {
+        padding: 5px 6px;
+        gap: 3px;
+    }
+    
+    .header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .header-controls {
+        gap: 4px;
+    }
+    
+    .search-box {
+        gap: 4px;
+    }
+    
+    .search-box input {
+        padding: 5px 6px;
+        font-size: 12px;
+        min-height: 30px;
+    }
+    
+    .search-box input::-webkit-input-placeholder {
+        font-size: 10px;
+    }
+    
+    .search-box input::-moz-placeholder {
+        font-size: 10px;
+    }
+    
+    .search-box input:-ms-input-placeholder {
+        font-size: 10px;
+    }
+    
+    .search-box button {
+        padding: 5px 8px;
+        font-size: 12px;
+        min-height: 30px;
+    }
+    
+    .sidebar {
+        max-height: 100%;
+    }
+    
+    .tree-item {
+        padding: 5px 6px;
+        font-size: 12px;
+        min-height: 32px;
+    }
+    
+    .item-row {
+        padding: 8px;
+        min-height: 50px;
+    }
+    
+    .item-title {
+        font-size: 13px;
+    }
+    
+    .item-description {
+        font-size: 11px;
+    }
+    
+    .item-url {
+        font-size: 10px;
+    }
+    
+    .back-button {
+        padding: 4px 6px;
+        font-size: 11px;
+        min-height: 30px;
+    }
+    
+    .breadcrumb-item {
+        padding: 3px 5px;
+        font-size: 11px;
+        min-height: 30px;
+    }
+    
+    .theme-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
     }
 }

@@ -1,43 +1,23 @@
-// 数据管理器
+// 数据处理模块
 class DataManager {
     constructor() {
-        this.bookmarks = [];
-        this.categories = [];
-        this.bookmarksMap = new Map();
-        this.categoriesMap = new Map();
+        this.data = [];
+        this.treeData = {};
+        this.nodeMap = {}; // 添加节点映射以提高查找性能
     }
 
-    // 加载数据
-    async loadData() {
-        try {
-            // 并行加载书签和分类数据
-            const [bookmarksData, categoriesData] = await Promise.all([
-                this.loadCSV('data/bookmarks.csv'),
-                this.loadCSV('data/categories.csv')
-            ]);
-
-            this.categories = this.processCategoriesData(categoriesData);
-            this.bookmarks = this.processBookmarksData(bookmarksData);
-            
-            this.buildDataMaps();
-            console.log('数据加载完成', { bookmarks: this.bookmarks, categories: this.categories });
-            return { bookmarks: this.bookmarks, categories: this.categories };
-        } catch (error) {
-            console.error('数据加载失败:', error);
-            throw error;
-        }
-    }
-
-    // 加载CSV文件
-    loadCSV(filePath) {
+    // 加载CSV数据
+    async loadData(url = 'data/bookmarks.csv') {
         return new Promise((resolve, reject) => {
-            Papa.parse(filePath, {
+            Papa.parse(url, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
-                encoding: 'UTF-8',
                 complete: (results) => {
-                    resolve(results.data);
+                    // 转换新的CSV格式到内部格式
+                    this.data = this.convertNewFormat(results.data);
+                    this.buildTree();
+                    resolve(this.data);
                 },
                 error: (error) => {
                     reject(error);
@@ -46,152 +26,215 @@ class DataManager {
         });
     }
 
-    // 处理书签数据
-    processBookmarksData(rawData) {
-        return rawData.map((item, index) => {
-            return {
-                id: `bookmark_${index}`,
-                name: item['站点名称'],
-                icon: item['站点图标'] || '',
-                url: item['站点链接'],
-                description: item['站点说明'],
-                categoryPath: item['分类路径']
-            };
-        });
-    }
+    // 将新的CSV格式转换为内部格式
+    convertNewFormat(newData) {
+        const convertedData = [];
+        const categoryMap = new Map(); // 用于映射类别路径到ID
+        let idCounter = 1;
 
-    // 处理分类数据
-    processCategoriesData(rawData) {
-        return rawData.map(item => {
-            // 解析分类路径
-            const pathParts = item['分类路径'] ? item['分类路径'].split('/') : [];
-            return {
-                path: item['分类路径'],
-                name: item['分类名称'],
-                description: item['分类描述'] || '',
-                level: pathParts.length,
-                pathParts: pathParts
-            };
-        });
-    }
-
-    // 构建数据映射
-    buildDataMaps() {
-        // 构建书签映射
-        this.bookmarksMap.clear();
-        this.bookmarks.forEach(bookmark => {
-            this.bookmarksMap.set(bookmark.id, bookmark);
+        // 收集所有唯一的类别组合
+        const categories = new Set();
+        newData.forEach(item => {
+            // 添加所有层级的类别
+            if (item.类别1) categories.add(item.类别1);
+            if (item.类别1 && item.类别2) categories.add(`${item.类别1}/${item.类别2}`);
+            if (item.类别1 && item.类别2 && item.类别3) categories.add(`${item.类别1}/${item.类别2}/${item.类别3}`);
+            if (item.类别1 && item.类别2 && item.类别3 && item.类别4) categories.add(`${item.类别1}/${item.类别2}/${item.类别3}/${item.类别4}`);
+            if (item.类别1 && item.类别2 && item.类别3 && item.类别4 && item.类别5) categories.add(`${item.类别1}/${item.类别2}/${item.类别3}/${item.类别4}/${item.类别5}`);
         });
 
-        // 构建分类映射
-        this.categoriesMap.clear();
-        this.categories.forEach(category => {
-            this.categoriesMap.set(category.path, category);
+        // 为每个唯一类别创建ID映射
+        categories.forEach(category => {
+            categoryMap.set(category, String(idCounter++));
         });
+
+        // 处理目录（类别）节点
+        categories.forEach(category => {
+            const parts = category.split('/');
+            const name = parts[parts.length - 1];
+            
+            // 确定父级
+            let parentId = '';
+            if (parts.length > 1) {
+                const parentPath = parts.slice(0, -1).join('/');
+                parentId = categoryMap.get(parentPath) || '';
+            }
+
+            convertedData.push({
+                id: categoryMap.get(category),
+                parent_id: parentId,
+                name: name,
+                type: 'folder',
+                url: '',
+                icon: '',
+                description: ''
+            });
+        });
+
+        // 处理链接节点
+        newData.forEach(item => {
+            // 确定父级ID（最深层的类别）
+            let parentId = '';
+            if (item.类别5) {
+                parentId = categoryMap.get(`${item.类别1}/${item.类别2}/${item.类别3}/${item.类别4}/${item.类别5}`) || '';
+            } else if (item.类别4) {
+                parentId = categoryMap.get(`${item.类别1}/${item.类别2}/${item.类别3}/${item.类别4}`) || '';
+            } else if (item.类别3) {
+                parentId = categoryMap.get(`${item.类别1}/${item.类别2}/${item.类别3}`) || '';
+            } else if (item.类别2) {
+                parentId = categoryMap.get(`${item.类别1}/${item.类别2}`) || '';
+            } else if (item.类别1) {
+                parentId = categoryMap.get(item.类别1) || '';
+            }
+
+            convertedData.push({
+                id: String(idCounter++),
+                parent_id: parentId,
+                name: item.站点名称,
+                type: 'link',
+                url: item.站点链接 || '',
+                icon: item.站点图标 || '',
+                description: item.站点说明 || ''
+            });
+        });
+
+        return convertedData;
     }
 
-    // 根据ID获取书签
-    getBookmarkById(id) {
-        return this.bookmarksMap.get(id);
-    }
-
-    // 根据路径获取分类
-    getCategoryByPath(path) {
-        return this.categoriesMap.get(path);
-    }
-
-    // 获取分类的完整路径
-    getCategoryPath(categoryPath) {
-        if (!categoryPath) return [];
+    // 构建树形结构
+    buildTree() {
+        // 初始化节点映射
+        this.nodeMap = {};
         
-        const pathParts = categoryPath.split('/');
+        // 初始化所有节点
+        this.data.forEach(item => {
+            this.nodeMap[item.id] = { ...item, children: [] };
+        });
+        
+        // 构建父子关系
+        this.data.forEach(item => {
+            if (item.parent_id && this.nodeMap[item.parent_id]) {
+                this.nodeMap[item.parent_id].children.push(this.nodeMap[item.id]);
+            }
+        });
+        
+        // 找到根节点
+        this.treeData = {
+            id: 'root',
+            name: '所有书签',
+            type: 'folder',
+            children: []
+        };
+        
+        this.data.forEach(item => {
+            if (!item.parent_id || item.parent_id === '') {
+                this.treeData.children.push(this.nodeMap[item.id]);
+            }
+        });
+    }
+
+    // 获取指定节点的子项
+    getChildren(parentId) {
+        if (!parentId) {
+            return this.treeData.children || [];
+        }
+        
+        const node = this.nodeMap[parentId];
+        return node ? (node.children || []) : [];
+    }
+
+    // 根据ID查找节点
+    getNodeById(id) {
+        if (id === 'root') {
+            return this.treeData;
+        }
+        
+        return this.nodeMap[id] || null;
+    }
+
+    // 获取节点路径
+    getPathToNode(id) {
         const path = [];
         
-        for (let i = 1; i <= pathParts.length; i++) {
-            const partialPath = pathParts.slice(0, i).join('/');
-            const category = this.getCategoryByPath(partialPath);
-            if (category) {
-                path.push({
-                    ...category,
-                    id: partialPath  // 使用路径作为ID
+        if (id === 'root') {
+            path.push(this.treeData);
+            return path;
+        }
+        
+        // 使用迭代方式查找路径，避免递归
+        const visited = new Set();
+        const stack = [{ node: this.treeData, path: [this.treeData] }];
+        
+        while (stack.length > 0) {
+            const { node, path: currentPath } = stack.pop();
+            
+            // 避免循环引用
+            if (visited.has(node.id)) continue;
+            visited.add(node.id);
+            
+            if (node.id === id) {
+                return currentPath;
+            }
+            
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(child => {
+                    stack.push({ 
+                        node: child, 
+                        path: [...currentPath, child] 
+                    });
                 });
             }
         }
         
-        return path;
+        return [];
     }
 
-    // 获取指定分类下的所有书签
-    getBookmarksByCategory(categoryPath) {
-        return this.bookmarks.filter(bookmark => 
-            bookmark.categoryPath === categoryPath);
-    }
-
-    // 获取指定分类下的所有子分类
-    getChildrenCategories(parentPath) {
-        if (!parentPath) {
-            // 返回根分类
-            return this.categories.filter(category => 
-                category.pathParts.length === 1);
-        }
-        
-        return this.categories.filter(category => {
-            if (category.pathParts.length !== parentPath.split('/').length + 1) {
-                return false;
-            }
-            
-            const parentParts = parentPath.split('/');
-            const categoryParts = category.pathParts;
-            
-            // 检查是否为子分类
-            for (let i = 0; i < parentParts.length; i++) {
-                if (parentParts[i] !== categoryParts[i]) {
-                    return false;
-                }
-            }
-            
-            return true;
-        });
-    }
-
-    // 获取根分类
-    getRootCategories() {
-        return this.categories.filter(category => 
-            category.pathParts.length === 1);
-    }
-
-    // 搜索功能
+    // 搜索功能（支持模糊搜索和拼音搜索）
     search(keyword) {
+        if (!keyword) return [];
+        
+        keyword = keyword.toLowerCase().trim();
         const results = [];
-        const lowerKeyword = keyword.toLowerCase();
         
-        // 搜索书签
-        this.bookmarks.forEach(bookmark => {
-            if (
-                bookmark.name.toLowerCase().includes(lowerKeyword) ||
-                (bookmark.description && bookmark.description.toLowerCase().includes(lowerKeyword)) ||
-                (bookmark.url && bookmark.url.toLowerCase().includes(lowerKeyword))
-            ) {
-                results.push({
-                    ...bookmark,
-                    type: 'bookmark'
-                });
-            }
-        });
+        // 创建拼音搜索关键词
+        const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
         
-        // 搜索分类
-        this.categories.forEach(category => {
-            if (
-                category.name.toLowerCase().includes(lowerKeyword) ||
-                (category.description && category.description.toLowerCase().includes(lowerKeyword))
-            ) {
-                results.push({
-                    ...category,
-                    id: category.path,  // 使用路径作为ID
-                    type: 'category'
-                });
+        // 使用迭代方式搜索，避免递归
+        const stack = [...this.treeData.children];
+        
+        while (stack.length > 0) {
+            const node = stack.pop();
+            
+            // 检查名称是否匹配（模糊搜索）
+            const nameMatch = node.name && 
+                (node.name.toLowerCase().includes(keyword) || 
+                 pinyinPro.pinyin(node.name, { toneType: 'none' }).toLowerCase().includes(keyword) ||
+                 pinyinPro.pinyin(node.name, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword));
+            
+            // 检查描述是否匹配
+            const descriptionMatch = node.description && 
+                (node.description.toLowerCase().includes(keyword) || 
+                 pinyinPro.pinyin(node.description, { toneType: 'none' }).toLowerCase().includes(keyword) ||
+                 pinyinPro.pinyin(node.description, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword));
+            
+            // 检查URL是否匹配
+            const urlMatch = node.url && 
+                (node.url.toLowerCase().includes(keyword) || 
+                 node.url.toLowerCase().includes(pinyinKeyword));
+            
+            if (nameMatch || descriptionMatch || urlMatch) {
+                // 添加匹配信息用于高亮显示
+                const result = { ...node };
+                if (nameMatch) result.nameMatch = true;
+                if (descriptionMatch) result.descriptionMatch = true;
+                if (urlMatch) result.urlMatch = true;
+                results.push(result);
             }
-        });
+            
+            if (node.children && node.children.length > 0) {
+                stack.push(...node.children);
+            }
+        }
         
         return results;
     }
@@ -200,32 +243,27 @@ class DataManager {
     highlightKeyword(text, keyword) {
         if (!text || !keyword) return text;
         
+        // 创建拼音关键词
+        const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
         const lowerText = text.toLowerCase();
         const lowerKeyword = keyword.toLowerCase();
-        const index = lowerText.indexOf(lowerKeyword);
         
-        if (index === -1) {
-            // 尝试拼音匹配
-            const pinyinText = pinyinPro.html(text);
-            const lowerPinyinText = pinyinText.toLowerCase();
-            const pinyinIndex = lowerPinyinText.indexOf(lowerKeyword);
-            
-            if (pinyinIndex === -1) return text;
-            
-            const before = text.slice(0, pinyinIndex);
-            const match = text.slice(pinyinIndex, pinyinIndex + keyword.length);
-            const after = text.slice(pinyinIndex + keyword.length);
-            
-            return `${before}<mark>${match}</mark>${after}`;
+        // 检查是否包含直接匹配
+        if (lowerText.includes(lowerKeyword)) {
+            const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<mark>$1</mark>');
         }
         
-        const before = text.slice(0, index);
-        const match = text.slice(index, index + keyword.length);
-        const after = text.slice(index + keyword.length);
+        // 检查是否包含拼音匹配
+        const pinyinText = pinyinPro.pinyin(text, { toneType: 'none', type: 'array' }).join('').toLowerCase();
+        if (pinyinText.includes(pinyinKeyword)) {
+            // 简化的拼音匹配高亮（实际应用中可能需要更复杂的逻辑）
+            return text; // 暂时不处理拼音匹配的高亮
+        }
         
-        return `${before}<mark>${match}</mark>${after}`;
+        return text;
     }
 }
 
-// 创建全局数据管理器实例
+// 导出数据管理器实例
 const dataManager = new DataManager();

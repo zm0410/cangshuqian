@@ -1,4 +1,4 @@
-// 数据处理模块
+// 数据管理器
 class DataManager {
     constructor() {
         this.bookmarks = [];
@@ -16,8 +16,8 @@ class DataManager {
                 this.loadCSV('data/categories.csv')
             ]);
 
-            this.bookmarks = this.processBookmarksData(bookmarksData);
             this.categories = this.processCategoriesData(categoriesData);
+            this.bookmarks = this.processBookmarksData(bookmarksData);
             
             this.buildDataMaps();
             return { bookmarks: this.bookmarks, categories: this.categories };
@@ -53,7 +53,7 @@ class DataManager {
                 icon: item['站点图标'] || '',
                 url: item['站点链接'],
                 description: item['站点说明'],
-                categoryId: item['分类ID'] ? parseInt(item['分类ID']) : null
+                categoryPath: item['分类路径']
             };
         });
     }
@@ -61,16 +61,14 @@ class DataManager {
     // 处理分类数据
     processCategoriesData(rawData) {
         return rawData.map(item => {
+            // 解析分类路径
+            const pathParts = item['分类路径'].split('/');
             return {
-                id: parseInt(item['分类ID']),
+                path: item['分类路径'],
                 name: item['分类名称'],
-                parentId: item['父级分类ID'] ? parseInt(item['父级分类ID']) : null,
                 description: item['分类描述'],
-                level1: item['类别1'],
-                level2: item['类别2'],
-                level3: item['类别3'],
-                level4: item['类别4'],
-                level5: item['类别5']
+                level: pathParts.length,
+                pathParts: pathParts
             };
         });
     }
@@ -86,7 +84,7 @@ class DataManager {
         // 构建分类映射
         this.categoriesMap.clear();
         this.categories.forEach(category => {
-            this.categoriesMap.set(category.id, category);
+            this.categoriesMap.set(category.path, category);
         });
     }
 
@@ -95,43 +93,69 @@ class DataManager {
         return this.bookmarksMap.get(id);
     }
 
-    // 根据ID获取分类
-    getCategoryById(id) {
-        return this.categoriesMap.get(id);
+    // 根据路径获取分类
+    getCategoryByPath(path) {
+        return this.categoriesMap.get(path);
     }
 
     // 获取分类的完整路径
-    getCategoryPath(categoryId) {
-        const path = [];
-        let currentId = categoryId;
+    getCategoryPath(categoryPath) {
+        if (!categoryPath) return [];
         
-        while (currentId) {
-            const category = this.getCategoryById(currentId);
-            if (!category) break;
-            
-            path.unshift(category);
-            currentId = category.parentId;
+        const pathParts = categoryPath.split('/');
+        const path = [];
+        
+        for (let i = 1; i <= pathParts.length; i++) {
+            const partialPath = pathParts.slice(0, i).join('/');
+            const category = this.getCategoryByPath(partialPath);
+            if (category) {
+                path.push({
+                    ...category,
+                    id: partialPath  // 使用路径作为ID
+                });
+            }
         }
         
         return path;
     }
 
-    // 获取分类下的所有书签
-    getBookmarksByCategory(categoryId) {
+    // 获取指定分类下的所有书签
+    getBookmarksByCategory(categoryPath) {
         return this.bookmarks.filter(bookmark => 
-            bookmark.categoryId === categoryId);
+            bookmark.categoryPath === categoryPath);
     }
 
-    // 获取分类下的所有子分类
-    getChildrenCategories(parentId) {
-        return this.categories.filter(category => 
-            category.parentId === parentId);
+    // 获取指定分类下的所有子分类
+    getChildrenCategories(parentPath) {
+        if (!parentPath) {
+            // 返回根分类
+            return this.categories.filter(category => 
+                category.pathParts.length === 1);
+        }
+        
+        return this.categories.filter(category => {
+            if (category.pathParts.length !== parentPath.split('/').length + 1) {
+                return false;
+            }
+            
+            const parentParts = parentPath.split('/');
+            const categoryParts = category.pathParts;
+            
+            // 检查是否为子分类
+            for (let i = 0; i < parentParts.length; i++) {
+                if (parentParts[i] !== categoryParts[i]) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
     }
 
     // 获取根分类
     getRootCategories() {
         return this.categories.filter(category => 
-            category.parentId === null);
+            category.pathParts.length === 1);
     }
 
     // 搜索功能
@@ -161,6 +185,7 @@ class DataManager {
             ) {
                 results.push({
                     ...category,
+                    id: category.path,  // 使用路径作为ID
                     type: 'category'
                 });
             }

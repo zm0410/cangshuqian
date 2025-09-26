@@ -60,14 +60,14 @@ function getCurrentPath() {
     
     // 如果是分类节点
     if (currentNodeId.startsWith('category_')) {
-        const categoryId = parseInt(currentNodeId.replace('category_', ''));
-        return dataManager.getCategoryPath(categoryId);
+        const categoryPath = currentNodeId.replace('category_', '');
+        return dataManager.getCategoryPath(categoryPath);
     }
     
     // 如果是书签节点
     const bookmark = dataManager.getBookmarkById(currentNodeId);
     if (bookmark) {
-        const categoryPath = dataManager.getCategoryPath(bookmark.categoryId);
+        const categoryPath = dataManager.getCategoryPath(bookmark.categoryPath);
         return [...categoryPath, bookmark];
     }
     
@@ -138,9 +138,15 @@ function renderContent(nodeId) {
     if (nodeId === 'root') {
         node = { id: 'root', name: '首页', type: 'root' };
     } else if (nodeId.startsWith('category_')) {
-        const categoryId = parseInt(nodeId.replace('category_', ''));
-        node = dataManager.getCategoryById(categoryId);
-        if (node) node.type = 'category';
+        const categoryPath = nodeId.replace('category_', '');
+        const category = dataManager.getCategoryByPath(categoryPath);
+        if (category) {
+            node = {
+                ...category,
+                id: nodeId,
+                type: 'category'
+            };
+        }
     } else {
         node = dataManager.getBookmarkById(nodeId);
         if (node) node.type = 'bookmark';
@@ -188,22 +194,22 @@ function renderItems(nodeId) {
         // 渲染根分类
         const rootCategories = dataManager.getRootCategories();
         rootCategories.forEach((category, index) => {
-            const row = createCategoryRow(category, index);
+            const row = createCategoryRow(category, index, '');
             itemsContainer.appendChild(row);
         });
     } else if (nodeId.startsWith('category_')) {
         // 渲染分类下的子项
-        const categoryId = parseInt(nodeId.replace('category_', ''));
+        const categoryPath = nodeId.replace('category_', '');
         
         // 渲染子分类
-        const childCategories = dataManager.getChildrenCategories(categoryId);
+        const childCategories = dataManager.getChildrenCategories(categoryPath);
         childCategories.forEach((category, index) => {
-            const row = createCategoryRow(category, index);
+            const row = createCategoryRow(category, index, categoryPath);
             itemsContainer.appendChild(row);
         });
         
         // 渲染该分类下的书签
-        const bookmarks = dataManager.getBookmarksByCategory(categoryId);
+        const bookmarks = dataManager.getBookmarksByCategory(categoryPath);
         bookmarks.forEach((bookmark, index) => {
             const row = createBookmarkRow(bookmark, childCategories.length + index);
             itemsContainer.appendChild(row);
@@ -212,10 +218,11 @@ function renderItems(nodeId) {
 }
 
 // 创建分类行元素
-function createCategoryRow(category, index) {
+function createCategoryRow(category, index, parentPath) {
     const row = document.createElement('div');
     row.className = 'item-row folder';
-    row.dataset.id = `category_${category.id}`;
+    const categoryPath = parentPath ? `${parentPath}/${category.name}` : category.name;
+    row.dataset.id = `category_${categoryPath}`;
     
     // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
@@ -245,8 +252,8 @@ function createCategoryRow(category, index) {
     
     // 添加点击事件
     row.addEventListener('click', () => {
-        treeRenderer.selectNode(`category_${category.id}`);
-        renderContent(`category_${category.id}`);
+        treeRenderer.selectNode(`category_${categoryPath}`);
+        renderContent(`category_${categoryPath}`);
     });
     
     return row;
@@ -341,15 +348,9 @@ function renderBreadcrumb(nodeId) {
                 if (node.id === 'root') {
                     treeRenderer.selectNode('root');
                     renderContent('root');
-                } else if (node.id.toString().startsWith('category_')) {
-                    const categoryId = node.id.toString().replace('category_', '');
-                    treeRenderer.selectNode(`category_${categoryId}`);
-                    renderContent(`category_${categoryId}`);
                 } else {
-                    // 书签节点，导航到其分类
-                    const categoryId = node.categoryId;
-                    treeRenderer.selectNode(`category_${categoryId}`);
-                    renderContent(`category_${categoryId}`);
+                    treeRenderer.selectNode(node.id);
+                    renderContent(node.id);
                 }
             });
         }
@@ -464,7 +465,7 @@ function createSearchResultBookmarkRow(bookmark, keyword, index) {
 function createSearchResultCategoryRow(category, keyword, index) {
     const row = document.createElement('div');
     row.className = 'item-row folder';
-    row.dataset.id = `category_${category.id}`;
+    row.dataset.id = `category_${category.path}`;
     
     // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
@@ -494,8 +495,8 @@ function createSearchResultCategoryRow(category, keyword, index) {
     
     // 添加点击事件
     row.addEventListener('click', () => {
-        treeRenderer.selectNode(`category_${category.id}`);
-        renderContent(`category_${category.id}`);
+        treeRenderer.selectNode(`category_${category.path}`);
+        renderContent(`category_${category.path}`);
     });
     
     return row;
@@ -503,37 +504,33 @@ function createSearchResultCategoryRow(category, keyword, index) {
 
 // 创建示例数据文件
 function createSampleData() {
-    const sampleCategories = `分类ID,分类名称,父级分类ID,分类描述,类别1,类别2,类别3,类别4,类别5
-1,开发工具,,,开发工具,代码托管,,,
-2,代码托管,1,,开发工具,代码托管,,,
-3,文档,1,,开发工具,文档,,,
-4,教程,1,,开发工具,教程,,,
-5,社区,1,,开发工具,社区,,,
-6,前端框架,1,,开发工具,前端框架,,,
-7,后端框架,1,,开发工具,后端框架,,,
-8,设计工具,,,设计工具,UI设计,,,
-9,UI设计,8,,设计工具,UI设计,,,
-10,图像处理,8,,设计工具,图像处理,,,
-11,社交,,,社交,知识社区,,,
-12,知识社区,11,,社交,知识社区,,,
-13,技术,,,技术,云服务,,,
-14,云服务,13,,技术,云服务,,,
-15,开发运维,13,,技术,开发运维,,,
+    const sampleCategories = `分类路径,分类名称,分类描述
+开发工具/代码托管,代码托管,
+开发工具/文档,文档,
+开发工具/教程,教程,
+开发工具/社区,社区,
+开发工具/前端框架,前端框架,
+开发工具/后端框架,后端框架,
+设计工具/UI设计,UI设计,
+设计工具/图像处理,图像处理,
+社交/知识社区,知识社区,
+技术/云服务,云服务,
+技术/开发运维,开发运维,
 `;
 
-    const sampleBookmarks = `站点名称,站点图标,站点链接,站点说明,分类ID
-GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,2
-MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,3
-W3Schools,https://www.w3schools.com/favicon.ico,https://www.w3schools.com/,Web开发教程网站,4
-Stack Overflow,https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico,https://stackoverflow.com/,程序员问答社区,5
-React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,6
-Vue.js,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,6
-Node.js,https://nodejs.org/static/images/favicons/favicon.ico,https://nodejs.org/,Node.js JavaScript运行时,7
-Figma,https://static.figma.com/app/icon/1/favicon.ico,https://www.figma.com/,协作式UI设计工具,9
-Photoshop,https://www.adobe.com/content/dam/cc/Adobe_favicon.ico,https://www.adobe.com/products/photoshop.html,图像处理软件,10
-知乎,https://static.zhihu.com/heifetz/favicon.ico,https://www.zhihu.com/,中文问答社区,12
-腾讯云,https://cloud.tencent.com/favicon.ico,https://cloud.tencent.com/,云计算服务,14
-Docker,https://www.docker.com/favicon.ico,https://www.docker.com/,容器化平台,15
+    const sampleBookmarks = `站点名称,站点图标,站点链接,站点说明,分类路径
+GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,开发工具/代码托管
+MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,开发工具/文档
+W3Schools,https://www.w3schools.com/favicon.ico,https://www.w3schools.com/,Web开发教程网站,开发工具/教程
+Stack Overflow,https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico,https://stackoverflow.com/,程序员问答社区,开发工具/社区
+React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,开发工具/前端框架
+Vue.js,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,开发工具/前端框架
+Node.js,https://nodejs.org/static/images/favicons/favicon.ico,https://nodejs.org/,Node.js JavaScript运行时,开发工具/后端框架
+Figma,https://static.figma.com/app/icon/1/favicon.ico,https://www.figma.com/,协作式UI设计工具,设计工具/UI设计
+Photoshop,https://www.adobe.com/content/dam/cc/Adobe_favicon.ico,https://www.adobe.com/products/photoshop.html,图像处理软件,设计工具/图像处理
+知乎,https://static.zhihu.com/heifetz/favicon.ico,https://www.zhihu.com/,中文问答社区,社交/知识社区
+腾讯云,https://cloud.tencent.com/favicon.ico,https://cloud.tencent.com/,云计算服务,技术/云服务
+Docker,https://www.docker.com/favicon.ico,https://www.docker.com/,容器化平台,技术/开发运维
 `;
 
     console.log('请在项目data目录下创建categories.csv和bookmarks.csv文件:');

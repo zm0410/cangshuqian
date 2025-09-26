@@ -21,25 +21,29 @@ class TreeRenderer {
             // 获取根分类
             const rootCategories = this.dataManager.getRootCategories();
             return rootCategories.map(category => {
+                const categoryPath = category.pathParts[0];
                 return {
-                    id: `category_${category.id}`,
+                    id: `category_${categoryPath}`,
                     name: category.name,
                     type: 'folder',
                     description: category.description,
-                    children: this.buildTree(`category_${category.id}`)
+                    path: categoryPath,
+                    children: this.buildTree(`category_${categoryPath}`)
                 };
             });
         } else if (parentId.startsWith('category_')) {
             // 获取子分类
-            const categoryId = parseInt(parentId.replace('category_', ''));
-            const childCategories = this.dataManager.getChildrenCategories(categoryId);
+            const parentPath = parentId.replace('category_', '');
+            const childCategories = this.dataManager.getChildrenCategories(parentPath);
             return childCategories.map(category => {
+                const categoryPath = category.path;
                 return {
-                    id: `category_${category.id}`,
+                    id: `category_${categoryPath}`,
                     name: category.name,
                     type: 'folder',
                     description: category.description,
-                    children: this.buildTree(`category_${category.id}`)
+                    path: categoryPath,
+                    children: this.buildTree(`category_${categoryPath}`)
                 };
             });
         }

@@ -10,7 +10,7 @@ function updatePageMetadata(node) {
     
     if (node && node.id !== 'root') {
         document.title = `${node.name} - ${baseTitle}`;
-        const description = node.description || (node.type === 'folder' 
+        const description = node.description || (node.type === 'category' 
             ? `浏览${node.name}分类下的网站和子分类` 
             : `访问${node.name}网站 - ${node.description || ''}`);
         document.querySelector('meta[name="description"]').setAttribute('content', description);
@@ -194,7 +194,7 @@ function renderItems(nodeId) {
         // 渲染根分类
         const rootCategories = dataManager.getRootCategories();
         rootCategories.forEach((category, index) => {
-            const row = createCategoryRow(category, index, '');
+            const row = createCategoryRow(category, index);
             itemsContainer.appendChild(row);
         });
     } else if (nodeId.startsWith('category_')) {
@@ -204,7 +204,7 @@ function renderItems(nodeId) {
         // 渲染子分类
         const childCategories = dataManager.getChildrenCategories(categoryPath);
         childCategories.forEach((category, index) => {
-            const row = createCategoryRow(category, index, categoryPath);
+            const row = createCategoryRow(category, index);
             itemsContainer.appendChild(row);
         });
         
@@ -218,11 +218,10 @@ function renderItems(nodeId) {
 }
 
 // 创建分类行元素
-function createCategoryRow(category, index, parentPath) {
+function createCategoryRow(category, index) {
     const row = document.createElement('div');
     row.className = 'item-row folder';
-    const categoryPath = parentPath ? `${parentPath}/${category.name}` : category.name;
-    row.dataset.id = `category_${categoryPath}`;
+    row.dataset.id = `category_${category.path}`;
     
     // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
@@ -252,8 +251,8 @@ function createCategoryRow(category, index, parentPath) {
     
     // 添加点击事件
     row.addEventListener('click', () => {
-        treeRenderer.selectNode(`category_${categoryPath}`);
-        renderContent(`category_${categoryPath}`);
+        treeRenderer.selectNode(`category_${category.path}`);
+        renderContent(`category_${category.path}`);
     });
     
     return row;

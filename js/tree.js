@@ -21,14 +21,13 @@ class TreeRenderer {
             // 获取根分类
             const rootCategories = this.dataManager.getRootCategories();
             return rootCategories.map(category => {
-                const categoryPath = category.pathParts[0];
                 return {
-                    id: `category_${categoryPath}`,
+                    id: `category_${category.path}`,
                     name: category.name,
                     type: 'folder',
                     description: category.description,
-                    path: categoryPath,
-                    children: this.buildTree(`category_${categoryPath}`)
+                    path: category.path,
+                    children: this.buildTree(`category_${category.path}`)
                 };
             });
         } else if (parentId.startsWith('category_')) {
@@ -36,14 +35,13 @@ class TreeRenderer {
             const parentPath = parentId.replace('category_', '');
             const childCategories = this.dataManager.getChildrenCategories(parentPath);
             return childCategories.map(category => {
-                const categoryPath = category.path;
                 return {
-                    id: `category_${categoryPath}`,
+                    id: `category_${category.path}`,
                     name: category.name,
                     type: 'folder',
                     description: category.description,
-                    path: categoryPath,
-                    children: this.buildTree(`category_${categoryPath}`)
+                    path: category.path,
+                    children: this.buildTree(`category_${category.path}`)
                 };
             });
         }

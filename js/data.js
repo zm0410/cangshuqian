@@ -20,6 +20,7 @@ class DataManager {
             this.bookmarks = this.processBookmarksData(bookmarksData);
             
             this.buildDataMaps();
+            console.log('数据加载完成', { bookmarks: this.bookmarks, categories: this.categories });
             return { bookmarks: this.bookmarks, categories: this.categories };
         } catch (error) {
             console.error('数据加载失败:', error);
@@ -34,6 +35,7 @@ class DataManager {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
+                encoding: 'UTF-8',
                 complete: (results) => {
                     resolve(results.data);
                 },
@@ -62,11 +64,11 @@ class DataManager {
     processCategoriesData(rawData) {
         return rawData.map(item => {
             // 解析分类路径
-            const pathParts = item['分类路径'].split('/');
+            const pathParts = item['分类路径'] ? item['分类路径'].split('/') : [];
             return {
                 path: item['分类路径'],
                 name: item['分类名称'],
-                description: item['分类描述'],
+                description: item['分类描述'] || '',
                 level: pathParts.length,
                 pathParts: pathParts
             };

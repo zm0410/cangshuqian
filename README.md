@@ -30,13 +30,37 @@
 
 ## 数据维护
 
+编辑以下文件来管理网址数据：
+
+### 分类数据维护
+
+编辑 [data/categories.csv](data/categories.csv) 文件来管理分类体系：
+
+```csv
+分类ID,分类名称,父级分类ID,分类描述,类别1,类别2,类别3,类别4,类别5
+```
+
+分类说明：
+- 分类ID：每个分类的唯一标识符
+- 分类名称：分类的显示名称
+- 父级分类ID：上级分类的ID，根分类此字段为空
+- 分类描述：分类的详细说明
+- 类别1-5：分类的层级路径，用于面包屑导航显示
+
+### 书签数据维护
+
 编辑 [data/bookmarks.csv](data/bookmarks.csv) 文件来管理网址数据：
 
 ```csv
-站点名称,站点图标,站点链接,站点说明,类别1,类别2,类别3,类别4,类别5
+站点名称,站点图标,站点链接,站点说明,分类ID
 ```
 
-数据文件采用 CSV 格式，支持最多 5 级分类。网址信息包括名称、图标链接、网址链接和说明。
+书签说明：
+- 站点名称：网站的显示名称
+- 站点图标：网站图标的URL地址
+- 站点链接：网站的URL地址
+- 站点说明：网站的详细说明
+- 分类ID：网站所属分类的ID（对应categories.csv中的分类ID）
 
 ## 使用说明
 
@@ -53,7 +77,8 @@
 ├── css/
 │   └── style.css          # 样式文件
 ├── data/
-│   └── bookmarks.csv      # 网址数据文件
+│   ├── bookmarks.csv      # 网址数据文件
+│   └── categories.csv     # 分类数据文件
 ├── js/
 │   ├── data.js            # 数据处理逻辑
 │   ├── main.js            # 主要交互逻辑
@@ -67,6 +92,7 @@
 
 你可以通过修改以下文件来自定义网站：
 
+- [data/categories.csv](data/categories.csv) - 更新分类体系
 - [data/bookmarks.csv](data/bookmarks.csv) - 更新网址数据
 - [css/style.css](css/style.css) - 修改样式
 - [js/data.js](js/data.js) - 修改数据处理逻辑

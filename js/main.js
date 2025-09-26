@@ -32,7 +32,7 @@ function updateBreadcrumbStructuredData() {
     }
     
     // 添加新的面包屑结构化数据
-    const path = dataManager.getPathToNode(currentNodeId);
+    const path = getCurrentPath();
     if (path.length <= 1) return; // 根节点不需要结构化数据
     
     const breadcrumbList = {
@@ -50,6 +50,28 @@ function updateBreadcrumbStructuredData() {
     script.type = 'application/ld+json';
     script.text = JSON.stringify(breadcrumbList);
     document.head.appendChild(script);
+}
+
+// 获取当前路径
+function getCurrentPath() {
+    if (currentNodeId === 'root') {
+        return [{ id: 'root', name: '首页' }];
+    }
+    
+    // 如果是分类节点
+    if (currentNodeId.startsWith('category_')) {
+        const categoryId = parseInt(currentNodeId.replace('category_', ''));
+        return dataManager.getCategoryPath(categoryId);
+    }
+    
+    // 如果是书签节点
+    const bookmark = dataManager.getBookmarkById(currentNodeId);
+    if (bookmark) {
+        const categoryPath = dataManager.getCategoryPath(bookmark.categoryId);
+        return [...categoryPath, bookmark];
+    }
+    
+    return [{ id: 'root', name: '首页' }];
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -112,7 +134,18 @@ function renderContent(nodeId) {
     currentNodeId = nodeId;
     
     // SEO优化：更新页面元数据
-    const node = dataManager.getNodeById(nodeId);
+    let node = null;
+    if (nodeId === 'root') {
+        node = { id: 'root', name: '首页', type: 'root' };
+    } else if (nodeId.startsWith('category_')) {
+        const categoryId = parseInt(nodeId.replace('category_', ''));
+        node = dataManager.getCategoryById(categoryId);
+        if (node) node.type = 'category';
+    } else {
+        node = dataManager.getBookmarkById(nodeId);
+        if (node) node.type = 'bookmark';
+    }
+    
     updatePageMetadata(node);
     
     // 更新导航历史（避免重复添加）
@@ -137,30 +170,93 @@ function renderContent(nodeId) {
     breadcrumb.innerHTML = '';
     breadcrumb.appendChild(backButton);
     
-    // 获取当前节点数据
-    const nodeData = dataManager.getNodeById(nodeId);
-    if (!nodeData) return;
-    
     // 渲染面包屑
     renderBreadcrumb(nodeId);
     
-    // 获取子项
-    const children = dataManager.getChildren(nodeId);
-    
     // 渲染子项
-    children.forEach((item, index) => {
-        const row = createItemRow(item, index);
-        itemsContainer.appendChild(row);
-    });
+    renderItems(nodeId);
     
     // 应用黑暗模式类
     updateDarkModeClasses();
 }
 
-// 创建项目行元素
-function createItemRow(item, index) {
+// 渲染项目
+function renderItems(nodeId) {
+    const itemsContainer = document.getElementById('itemsContainer');
+    
+    if (nodeId === 'root') {
+        // 渲染根分类
+        const rootCategories = dataManager.getRootCategories();
+        rootCategories.forEach((category, index) => {
+            const row = createCategoryRow(category, index);
+            itemsContainer.appendChild(row);
+        });
+    } else if (nodeId.startsWith('category_')) {
+        // 渲染分类下的子项
+        const categoryId = parseInt(nodeId.replace('category_', ''));
+        
+        // 渲染子分类
+        const childCategories = dataManager.getChildrenCategories(categoryId);
+        childCategories.forEach((category, index) => {
+            const row = createCategoryRow(category, index);
+            itemsContainer.appendChild(row);
+        });
+        
+        // 渲染该分类下的书签
+        const bookmarks = dataManager.getBookmarksByCategory(categoryId);
+        bookmarks.forEach((bookmark, index) => {
+            const row = createBookmarkRow(bookmark, childCategories.length + index);
+            itemsContainer.appendChild(row);
+        });
+    }
+}
+
+// 创建分类行元素
+function createCategoryRow(category, index) {
     const row = document.createElement('div');
-    row.className = `item-row ${item.type}`;
+    row.className = 'item-row folder';
+    row.dataset.id = `category_${category.id}`;
+    
+    // 添加延迟动画效果
+    row.style.animationDelay = `${index * 0.05}s`;
+    
+    const icon = document.createElement('div');
+    icon.className = 'item-icon';
+    icon.innerHTML = '📁';
+    
+    const info = document.createElement('div');
+    info.className = 'item-info';
+    
+    const title = document.createElement('div');
+    title.className = 'item-title';
+    title.textContent = category.name;
+    
+    info.appendChild(title);
+    
+    if (category.description) {
+        const description = document.createElement('div');
+        description.className = 'item-description';
+        description.textContent = category.description;
+        info.appendChild(description);
+    }
+    
+    row.appendChild(icon);
+    row.appendChild(info);
+    
+    // 添加点击事件
+    row.addEventListener('click', () => {
+        treeRenderer.selectNode(`category_${category.id}`);
+        renderContent(`category_${category.id}`);
+    });
+    
+    return row;
+}
+
+// 创建书签行元素
+function createBookmarkRow(bookmark, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row link';
+    row.dataset.id = bookmark.id;
     
     // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
@@ -169,20 +265,18 @@ function createItemRow(item, index) {
     icon.className = 'item-icon';
     
     // 根据是否有图标URL来决定显示什么图标
-    if (item.icon) {
+    if (bookmark.icon) {
         // 如果有图标URL，则显示网站图标
         const img = document.createElement('img');
-        img.src = item.icon;
-        img.alt = item.name;
+        img.src = bookmark.icon;
+        img.alt = bookmark.name;
         img.className = 'item-favicon';
         img.loading = 'lazy'; // SEO优化：延迟加载图片
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
-            icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';
+            icon.innerHTML = '🔗';
         };
         icon.appendChild(img);
-    } else if (item.type === 'folder') {
-        icon.innerHTML = '📁';
     } else {
         icon.innerHTML = '🔗';
     }
@@ -192,21 +286,21 @@ function createItemRow(item, index) {
     
     const title = document.createElement('div');
     title.className = 'item-title';
-    title.textContent = item.name;
+    title.textContent = bookmark.name;
     
     info.appendChild(title);
     
-    if (item.description) {
+    if (bookmark.description) {
         const description = document.createElement('div');
         description.className = 'item-description';
-        description.textContent = item.description;
+        description.textContent = bookmark.description;
         info.appendChild(description);
     }
     
-    if (item.url) {
+    if (bookmark.url) {
         const url = document.createElement('div');
         url.className = 'item-url';
-        url.textContent = item.url;
+        url.textContent = bookmark.url;
         info.appendChild(url);
     }
     
@@ -215,14 +309,8 @@ function createItemRow(item, index) {
     
     // 添加点击事件
     row.addEventListener('click', () => {
-        if (item.type === 'folder') {
-            // 选中文件夹
-            treeRenderer.selectNode(item.id);
-            renderContent(item.id);
-        } else if (item.type === 'link') {
-            // 打开链接
-            window.open(item.url, '_blank');
-        }
+        // 打开链接
+        window.open(bookmark.url, '_blank');
     });
     
     return row;
@@ -231,8 +319,7 @@ function createItemRow(item, index) {
 // 渲染面包屑导航
 function renderBreadcrumb(nodeId) {
     const breadcrumb = document.getElementById('breadcrumb');
-    
-    const path = dataManager.getPathToNode(nodeId);
+    const path = getCurrentPath();
     
     path.forEach((node, index) => {
         if (index > 0) {
@@ -251,8 +338,19 @@ function renderBreadcrumb(nodeId) {
             item.style.fontWeight = 'bold';
         } else {
             item.addEventListener('click', () => {
-                treeRenderer.selectNode(node.id);
-                renderContent(node.id);
+                if (node.id === 'root') {
+                    treeRenderer.selectNode('root');
+                    renderContent('root');
+                } else if (node.id.toString().startsWith('category_')) {
+                    const categoryId = node.id.toString().replace('category_', '');
+                    treeRenderer.selectNode(`category_${categoryId}`);
+                    renderContent(`category_${categoryId}`);
+                } else {
+                    // 书签节点，导航到其分类
+                    const categoryId = node.categoryId;
+                    treeRenderer.selectNode(`category_${categoryId}`);
+                    renderContent(`category_${categoryId}`);
+                }
             });
         }
         
@@ -282,7 +380,12 @@ function handleSearch() {
     }
     
     results.forEach((item, index) => {
-        const row = createSearchResultRow(item, keyword, index);
+        let row;
+        if (item.type === 'bookmark') {
+            row = createSearchResultBookmarkRow(item, keyword, index);
+        } else {
+            row = createSearchResultCategoryRow(item, keyword, index);
+        }
         itemsContainer.appendChild(row);
     });
     
@@ -294,10 +397,10 @@ function handleSearch() {
     updateDarkModeClasses();
 }
 
-// 创建搜索结果行元素
-function createSearchResultRow(item, keyword, index) {
+// 创建搜索结果书签行元素
+function createSearchResultBookmarkRow(bookmark, keyword, index) {
     const row = document.createElement('div');
-    row.className = `item-row ${item.type}`;
+    row.className = 'item-row link';
     
     // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
@@ -306,20 +409,18 @@ function createSearchResultRow(item, keyword, index) {
     icon.className = 'item-icon';
     
     // 根据是否有图标URL来决定显示什么图标
-    if (item.icon) {
+    if (bookmark.icon) {
         // 如果有图标URL，则显示网站图标
         const img = document.createElement('img');
-        img.src = item.icon;
-        img.alt = item.name;
+        img.src = bookmark.icon;
+        img.alt = bookmark.name;
         img.className = 'item-favicon';
         img.loading = 'lazy'; // SEO优化：延迟加载图片
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
-            icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';
+            icon.innerHTML = '🔗';
         };
         icon.appendChild(img);
-    } else if (item.type === 'folder') {
-        icon.innerHTML = '📁';
     } else {
         icon.innerHTML = '🔗';
     }
@@ -329,21 +430,21 @@ function createSearchResultRow(item, keyword, index) {
     
     const title = document.createElement('div');
     title.className = 'item-title';
-    title.innerHTML = dataManager.highlightKeyword(item.name, keyword);
+    title.innerHTML = dataManager.highlightKeyword(bookmark.name, keyword);
     
     info.appendChild(title);
     
-    if (item.description) {
+    if (bookmark.description) {
         const description = document.createElement('div');
         description.className = 'item-description';
-        description.innerHTML = dataManager.highlightKeyword(item.description, keyword);
+        description.innerHTML = dataManager.highlightKeyword(bookmark.description, keyword);
         info.appendChild(description);
     }
     
-    if (item.url) {
+    if (bookmark.url) {
         const url = document.createElement('div');
         url.className = 'item-url';
-        url.innerHTML = dataManager.highlightKeyword(item.url, keyword);
+        url.innerHTML = dataManager.highlightKeyword(bookmark.url, keyword);
         info.appendChild(url);
     }
     
@@ -352,14 +453,49 @@ function createSearchResultRow(item, keyword, index) {
     
     // 添加点击事件
     row.addEventListener('click', () => {
-        if (item.type === 'folder') {
-            // 选中文件夹
-            treeRenderer.selectNode(item.id);
-            renderContent(item.id);
-        } else if (item.type === 'link') {
-            // 打开链接
-            window.open(item.url, '_blank');
-        }
+        // 打开链接
+        window.open(bookmark.url, '_blank');
+    });
+    
+    return row;
+}
+
+// 创建搜索结果分类行元素
+function createSearchResultCategoryRow(category, keyword, index) {
+    const row = document.createElement('div');
+    row.className = 'item-row folder';
+    row.dataset.id = `category_${category.id}`;
+    
+    // 添加延迟动画效果
+    row.style.animationDelay = `${index * 0.05}s`;
+    
+    const icon = document.createElement('div');
+    icon.className = 'item-icon';
+    icon.innerHTML = '📁';
+    
+    const info = document.createElement('div');
+    info.className = 'item-info';
+    
+    const title = document.createElement('div');
+    title.className = 'item-title';
+    title.innerHTML = dataManager.highlightKeyword(category.name, keyword);
+    
+    info.appendChild(title);
+    
+    if (category.description) {
+        const description = document.createElement('div');
+        description.className = 'item-description';
+        description.innerHTML = dataManager.highlightKeyword(category.description, keyword);
+        info.appendChild(description);
+    }
+    
+    row.appendChild(icon);
+    row.appendChild(info);
+    
+    // 添加点击事件
+    row.addEventListener('click', () => {
+        treeRenderer.selectNode(`category_${category.id}`);
+        renderContent(`category_${category.id}`);
     });
     
     return row;
@@ -367,30 +503,46 @@ function createSearchResultRow(item, keyword, index) {
 
 // 创建示例数据文件
 function createSampleData() {
-    const sampleData = `站点名称,站点图标,站点链接,站点说明,类别1,类别2,类别3,类别4,类别5
-Google,https://www.google.com/favicon.ico,https://www.google.com/,全球最大的搜索引擎,,
-GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,开发工具,,
-MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,开发工具,文档,,
-React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,开发工具,前端框架,,
-Vue,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,开发工具,前端框架,,
-Angular,https://angular.io/assets/images/favicons/favicon.ico,https://angular.io/,现代Web开发平台,开发工具,前端框架,,
-Node.js,https://nodejs.org/static/images/favicons/favicon.ico,https://nodejs.org/,Node.js JavaScript运行时,开发工具,后端框架,,
-Express,https://expressjs.com/images/website-icons/favicon.png,https://expressjs.com/,基于Node.js的web应用框架,开发工具,后端框架,,
-Django,https://www.djangoproject.com/s/img/icon-touch.e4872c4da341.png,https://www.djangoproject.com/,Python Web框架,开发工具,后端框架,,
-Figma,https://static.figma.com/app/icon/1/favicon.ico,https://www.figma.com/,协作式UI设计工具,设计工具,,
-Photoshop,https://www.adobe.com/content/dam/cc/Adobe_favicon.ico,https://www.adobe.com/products/photoshop.html,图像处理软件,设计工具,Adobe,,
-Wikipedia,https://en.wikipedia.org/static/favicon/wikipedia.ico,https://www.wikipedia.org/,自由的百科全书,参考资源,,
-知乎,https://static.zhihu.com/heifetz/favicon.ico,https://www.zhihu.com/,中文问答社区,社交,,
-微博,https://weibo.com/favicon.ico,https://www.weibo.com/,社交媒体平台,社交,,
-AWS EC2,https://a0.awsstatic.com/libra-css/icons/favicons/favicon.ico,https://aws.amazon.com/ec2/,亚马逊云服务器,技术,云服务,AWS,,
-Docker Desktop,https://www.docker.com/favicon.ico,https://www.docker.com/products/docker-desktop/,Docker桌面版,技术,开发运维,容器化,开发环境,,
-Kubernetes Dashboard,https://kubernetes.io/images/favicon.png,https://github.com/kubernetes/dashboard, Kubernetes UI界面,技术,开发运维,容器编排,Kubernetes组件,,
+    const sampleCategories = `分类ID,分类名称,父级分类ID,分类描述,类别1,类别2,类别3,类别4,类别5
+1,开发工具,,,开发工具,代码托管,,,
+2,代码托管,1,,开发工具,代码托管,,,
+3,文档,1,,开发工具,文档,,,
+4,教程,1,,开发工具,教程,,,
+5,社区,1,,开发工具,社区,,,
+6,前端框架,1,,开发工具,前端框架,,,
+7,后端框架,1,,开发工具,后端框架,,,
+8,设计工具,,,设计工具,UI设计,,,
+9,UI设计,8,,设计工具,UI设计,,,
+10,图像处理,8,,设计工具,图像处理,,,
+11,社交,,,社交,知识社区,,,
+12,知识社区,11,,社交,知识社区,,,
+13,技术,,,技术,云服务,,,
+14,云服务,13,,技术,云服务,,,
+15,开发运维,13,,技术,开发运维,,,
 `;
 
-    console.log('请在项目根目录下创建data文件夹，并在其中创建bookmarks.csv文件，内容如下:');
-    console.log(sampleData);
+    const sampleBookmarks = `站点名称,站点图标,站点链接,站点说明,分类ID
+GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,2
+MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,3
+W3Schools,https://www.w3schools.com/favicon.ico,https://www.w3schools.com/,Web开发教程网站,4
+Stack Overflow,https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico,https://stackoverflow.com/,程序员问答社区,5
+React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,6
+Vue.js,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,6
+Node.js,https://nodejs.org/static/images/favicons/favicon.ico,https://nodejs.org/,Node.js JavaScript运行时,7
+Figma,https://static.figma.com/app/icon/1/favicon.ico,https://www.figma.com/,协作式UI设计工具,9
+Photoshop,https://www.adobe.com/content/dam/cc/Adobe_favicon.ico,https://www.adobe.com/products/photoshop.html,图像处理软件,10
+知乎,https://static.zhihu.com/heifetz/favicon.ico,https://www.zhihu.com/,中文问答社区,12
+腾讯云,https://cloud.tencent.com/favicon.ico,https://cloud.tencent.com/,云计算服务,14
+Docker,https://www.docker.com/favicon.ico,https://www.docker.com/,容器化平台,15
+`;
+
+    console.log('请在项目data目录下创建categories.csv和bookmarks.csv文件:');
+    console.log('\n=== categories.csv ===');
+    console.log(sampleCategories);
+    console.log('\n=== bookmarks.csv ===');
+    console.log(sampleBookmarks);
     
-    alert('请创建 data/bookmarks.csv 文件，内容可参考控制台输出');
+    alert('请创建 data/categories.csv 和 data/bookmarks.csv 文件，内容可参考控制台输出');
 }
 
 // 切换主题
@@ -452,8 +604,13 @@ function goBack() {
     const previousNodeId = navigationHistory[navigationHistory.length - 1];
     
     // 更新视图
-    treeRenderer.selectNode(previousNodeId);
-    renderContent(previousNodeId);
+    if (previousNodeId === 'root') {
+        treeRenderer.selectNode('root');
+        renderContent('root');
+    } else {
+        treeRenderer.selectNode(previousNodeId);
+        renderContent(previousNodeId);
+    }
 }
 
 // 更新返回按钮状态

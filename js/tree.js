@@ -17,14 +17,34 @@ class TreeRenderer {
 
     // 构建树形数据结构
     buildTree(parentId) {
-        const children = this.dataManager.getChildren(parentId);
-        return children.map(child => {
-            const grandchildren = this.dataManager.getChildren(child.id);
-            return {
-                ...child,
-                children: this.buildTree(child.id)
-            };
-        });
+        if (parentId === 'root') {
+            // 获取根分类
+            const rootCategories = this.dataManager.getRootCategories();
+            return rootCategories.map(category => {
+                return {
+                    id: `category_${category.id}`,
+                    name: category.name,
+                    type: 'folder',
+                    description: category.description,
+                    children: this.buildTree(`category_${category.id}`)
+                };
+            });
+        } else if (parentId.startsWith('category_')) {
+            // 获取子分类
+            const categoryId = parseInt(parentId.replace('category_', ''));
+            const childCategories = this.dataManager.getChildrenCategories(categoryId);
+            return childCategories.map(category => {
+                return {
+                    id: `category_${category.id}`,
+                    name: category.name,
+                    type: 'folder',
+                    description: category.description,
+                    children: this.buildTree(`category_${category.id}`)
+                };
+            });
+        }
+        
+        return [];
     }
 
     // 创建树形元素

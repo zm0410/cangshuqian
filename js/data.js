@@ -265,5 +265,199 @@ class DataManager {
     }
 }
 
-// 导出数据管理器实例
+// 数据管理器
+class DataManager {
+    constructor() {
+        this.data = [];
+        this.dataMap = new Map();
+    }
+
+    // 加载数据
+    async loadData() {
+        return new Promise((resolve, reject) => {
+            Papa.parse('data/bookmarks.csv', {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: (results) => {
+                    try {
+                        this.data = this.processData(results.data);
+                        this.buildDataMap();
+                        resolve(this.data);
+                    } catch (error) {
+                        reject(error);
+                    }
+                },
+                error: (error) => {
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    // 处理原始数据
+    processData(rawData) {
+        const processedData = [];
+        const idMap = new Map();
+        
+        rawData.forEach((item, index) => {
+            // 生成唯一ID
+            const id = `node_${index}`;
+            idMap.set(item['站点名称']+item['站点链接'], id);
+            
+            // 处理文件夹结构
+            const categories = [
+                item['类别1'], 
+                item['类别2'], 
+                item['类别3'], 
+                item['类别4'], 
+                item['类别5']
+            ].filter(cat => cat && cat.trim() !== '');
+            
+            // 为每个类别创建节点
+            let parentId = 'root';
+            categories.forEach((category, catIndex) => {
+                const categoryKey = categories.slice(0, catIndex + 1).join('>');
+                if (!idMap.has(categoryKey)) {
+                    const categoryId = `category_${idMap.size}`;
+                    idMap.set(categoryKey, categoryId);
+                    
+                    processedData.push({
+                        id: categoryId,
+                        name: category,
+                        type: 'folder',
+                        parentId: parentId,
+                        description: `包含${category}分类下的网站和子分类`,
+                        keywords: this.generateKeywords(category, 'folder')
+                    });
+                }
+                parentId = idMap.get(categoryKey);
+            });
+            
+            // 添加链接节点
+            if (item['站点链接'] && item['站点名称']) {
+                processedData.push({
+                    id: id,
+                    name: item['站点名称'],
+                    type: 'link',
+                    url: item['站点链接'],
+                    icon: item['站点图标'] || '',
+                    description: item['站点说明'] || '',
+                    parentId: parentId,
+                    keywords: this.generateKeywords(item['站点名称'] + ' ' + (item['站点说明'] || ''), 'link')
+                });
+            }
+        });
+        
+        return processedData;
+    }
+
+    // 生成关键词
+    generateKeywords(text, type) {
+        // 为SEO和搜索优化生成关键词
+        let keywords = [text];
+        
+        // 添加拼音
+        const pinyin = pinyinPro.html(text);
+        if (pinyin !== text) {
+            keywords.push(pinyin);
+        }
+        
+        // 根据类型添加相关关键词
+        if (type === 'folder') {
+            keywords.push('分类', '目录', '文件夹');
+        } else if (type === 'link') {
+            keywords.push('链接', '网站', '网址');
+        }
+        
+        return keywords.join(',');
+    }
+
+    // 构建数据映射
+    buildDataMap() {
+        this.dataMap.clear();
+        this.data.forEach(item => {
+            this.dataMap.set(item.id, item);
+        });
+    }
+
+    // 根据ID获取节点
+    getNodeById(id) {
+        return this.dataMap.get(id);
+    }
+
+    // 获取子节点
+    getChildren(parentId) {
+        return this.data.filter(item => item.parentId === parentId);
+    }
+
+    // 获取节点路径
+    getPathToNode(nodeId) {
+        const path = [];
+        let currentId = nodeId;
+        
+        while (currentId) {
+            const node = this.getNodeById(currentId);
+            if (!node) break;
+            
+            path.unshift(node);
+            currentId = currentId === 'root' ? null : node.parentId;
+        }
+        
+        return path;
+    }
+
+    // 搜索功能
+    search(keyword) {
+        const results = [];
+        const lowerKeyword = keyword.toLowerCase();
+        
+        this.data.forEach(item => {
+            // 检查名称、描述和关键词
+            if (
+                item.name.toLowerCase().includes(lowerKeyword) ||
+                (item.description && item.description.toLowerCase().includes(lowerKeyword)) ||
+                (item.keywords && item.keywords.toLowerCase().includes(lowerKeyword)) ||
+                // 拼音搜索
+                pinyinPro.html(item.name).toLowerCase().includes(lowerKeyword)
+            ) {
+                results.push(item);
+            }
+        });
+        
+        return results;
+    }
+
+    // 高亮关键词
+    highlightKeyword(text, keyword) {
+        if (!text || !keyword) return text;
+        
+        const lowerText = text.toLowerCase();
+        const lowerKeyword = keyword.toLowerCase();
+        const index = lowerText.indexOf(lowerKeyword);
+        
+        if (index === -1) {
+            // 尝试拼音匹配
+            const pinyinText = pinyinPro.html(text);
+            const lowerPinyinText = pinyinText.toLowerCase();
+            const pinyinIndex = lowerPinyinText.indexOf(lowerKeyword);
+            
+            if (pinyinIndex === -1) return text;
+            
+            const before = text.slice(0, pinyinIndex);
+            const match = text.slice(pinyinIndex, pinyinIndex + keyword.length);
+            const after = text.slice(pinyinIndex + keyword.length);
+            
+            return `${before}<mark>${match}</mark>${after}`;
+        }
+        
+        const before = text.slice(0, index);
+        const match = text.slice(index, index + keyword.length);
+        const after = text.slice(index + keyword.length);
+        
+        return `${before}<mark>${match}</mark>${after}`;
+    }
+}
+
+// 创建全局数据管理器实例
 const dataManager = new DataManager();

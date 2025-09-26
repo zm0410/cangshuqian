@@ -1,3 +1,155 @@
+// 树形结构渲染器
+class TreeRenderer {
+    constructor(containerId, dataManager) {
+        this.container = document.getElementById(containerId);
+        this.dataManager = dataManager;
+        this.selectedNodeId = null;
+    }
+
+    // 渲染树形结构
+    renderTree() {
+        const treeData = this.buildTree('root');
+        this.container.innerHTML = '';
+        const ul = this.createTreeElement(treeData, true);
+        ul.className = 'tree-root';
+        this.container.appendChild(ul);
+    }
+
+    // 构建树形数据结构
+    buildTree(parentId) {
+        const children = this.dataManager.getChildren(parentId);
+        return children.map(child => {
+            const grandchildren = this.dataManager.getChildren(child.id);
+            return {
+                ...child,
+                children: this.buildTree(child.id)
+            };
+        });
+    }
+
+    // 创建树形元素
+    createTreeElement(nodeData, isRoot = false) {
+        const ul = document.createElement('ul');
+        if (isRoot) {
+            ul.className = 'tree-root';
+        }
+
+        nodeData.forEach(node => {
+            const li = document.createElement('li');
+            li.className = 'tree-node';
+            li.dataset.id = node.id;
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'tree-item';
+            if (node.type === 'link') {
+                itemDiv.classList.add('tree-link-item');
+            }
+
+            // 创建展开/折叠图标
+            const toggleIcon = document.createElement('span');
+            toggleIcon.className = 'toggle';
+            toggleIcon.innerHTML = node.children && node.children.length > 0 ? '▶' : '';
+            if (node.children && node.children.length > 0) {
+                itemDiv.classList.add('has-children');
+            }
+
+            // 创建文件夹/链接图标
+            const typeIcon = document.createElement('span');
+            typeIcon.className = 'icon ' + (node.type === 'folder' ? 'folder-icon' : 'link-icon');
+            if (node.type === 'folder') {
+                typeIcon.setAttribute('data-expanded', 'false');
+            }
+
+            // 创建链接文本
+            if (node.type === 'link') {
+                const link = document.createElement('a');
+                link.href = node.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer'; // SEO优化：安全性和性能
+                link.className = 'tree-link';
+                link.textContent = node.name;
+                link.title = node.description || node.name; // SEO优化：添加title属性
+                
+                itemDiv.appendChild(toggleIcon);
+                itemDiv.appendChild(typeIcon);
+                itemDiv.appendChild(link);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'tree-text';
+                span.textContent = node.name;
+                span.title = node.description || node.name; // SEO优化：添加title属性
+                
+                itemDiv.appendChild(toggleIcon);
+                itemDiv.appendChild(typeIcon);
+                itemDiv.appendChild(span);
+            }
+
+            li.appendChild(itemDiv);
+
+            // 为有子节点的元素添加点击事件
+            if (node.children && node.children.length > 0) {
+                itemDiv.addEventListener('click', (e) => {
+                    // 防止点击链接时触发折叠/展开
+                    if (e.target.tagName === 'A') return;
+                    
+                    li.classList.toggle('expanded');
+                    const isExpanded = li.classList.contains('expanded');
+                    toggleIcon.innerHTML = isExpanded ? '▼' : '▶';
+                    if (node.type === 'folder') {
+                        typeIcon.setAttribute('data-expanded', isExpanded);
+                    }
+                    
+                    // 如果没有子节点元素，则创建
+                    if (isExpanded && !li.querySelector('ul')) {
+                        const childUl = this.createTreeElement(node.children);
+                        li.appendChild(childUl);
+                    }
+                });
+            } else if (node.type === 'folder') {
+                // 为没有子节点的文件夹添加点击事件
+                itemDiv.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A') return;
+                    this.selectNode(node.id);
+                });
+            }
+
+            // 为链接节点添加选中事件
+            if (node.type === 'link') {
+                itemDiv.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'A') return;
+                    this.selectNode(node.id);
+                });
+            }
+
+            ul.appendChild(li);
+        });
+
+        return ul;
+    }
+
+    // 选中节点
+    selectNode(nodeId) {
+        // 更新选中状态
+        if (this.selectedNodeId) {
+            const previousSelectedItem = document.querySelector(`.tree-item.selected[data-id="${this.selectedNodeId}"]`);
+            if (previousSelectedItem) {
+                previousSelectedItem.classList.remove('selected');
+            }
+        }
+
+        this.selectedNodeId = nodeId;
+        const selectedItem = document.querySelector(`.tree-item[data-id="${nodeId}"]`);
+        if (selectedItem) {
+            selectedItem.classList.add('selected');
+        }
+
+        // 触发选中事件
+        const event = new CustomEvent('nodeSelected', {
+            detail: { nodeId }
+        });
+        document.dispatchEvent(event);
+    }
+}
 // 树形组件模块
 class TreeRenderer {
     constructor(containerId, dataManager) {

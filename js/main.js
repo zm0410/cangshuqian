@@ -3,6 +3,55 @@
 let navigationHistory = [];
 let currentNodeId = 'root';
 
+// SEO优化：更新页面元数据
+function updatePageMetadata(node) {
+    const baseTitle = '仓鼠签 - 简约高效的导航网站';
+    const baseDescription = '仓鼠签是一个仿Windows资源管理器风格的网址导航网站，提供简洁高效的网址分类管理与访问体验。支持黑暗模式、模糊搜索和拼音搜索功能。';
+    
+    if (node && node.id !== 'root') {
+        document.title = `${node.name} - ${baseTitle}`;
+        const description = node.description || (node.type === 'folder' 
+            ? `浏览${node.name}分类下的网站和子分类` 
+            : `访问${node.name}网站 - ${node.description || ''}`);
+        document.querySelector('meta[name="description"]').setAttribute('content', description);
+    } else {
+        document.title = baseTitle;
+        document.querySelector('meta[name="description"]').setAttribute('content', baseDescription);
+    }
+    
+    // 更新面包屑结构化数据
+    updateBreadcrumbStructuredData();
+}
+
+// 更新面包屑结构化数据（SEO优化）
+function updateBreadcrumbStructuredData() {
+    // 移除现有的面包屑结构化数据
+    const existingScript = document.querySelector('script[type="application/ld+json"]');
+    if (existingScript) {
+        existingScript.remove();
+    }
+    
+    // 添加新的面包屑结构化数据
+    const path = dataManager.getPathToNode(currentNodeId);
+    if (path.length <= 1) return; // 根节点不需要结构化数据
+    
+    const breadcrumbList = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": path.map((node, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": node.name,
+            "item": window.location.origin + window.location.pathname + (node.id !== 'root' ? `#${node.id}` : '')
+        }))
+    };
+    
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(breadcrumbList);
+    document.head.appendChild(script);
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     // 初始化数据管理器和树形渲染器
     window.dataManager = dataManager;
@@ -62,6 +111,10 @@ function renderContent(nodeId) {
     // 更新当前节点ID
     currentNodeId = nodeId;
     
+    // SEO优化：更新页面元数据
+    const node = dataManager.getNodeById(nodeId);
+    updatePageMetadata(node);
+    
     // 更新导航历史（避免重复添加）
     if (navigationHistory[navigationHistory.length - 1] !== nodeId) {
         navigationHistory.push(nodeId);
@@ -85,8 +138,8 @@ function renderContent(nodeId) {
     breadcrumb.appendChild(backButton);
     
     // 获取当前节点数据
-    const node = dataManager.getNodeById(nodeId);
-    if (!node) return;
+    const nodeData = dataManager.getNodeById(nodeId);
+    if (!nodeData) return;
     
     // 渲染面包屑
     renderBreadcrumb(nodeId);
@@ -122,6 +175,7 @@ function createItemRow(item, index) {
         img.src = item.icon;
         img.alt = item.name;
         img.className = 'item-favicon';
+        img.loading = 'lazy'; // SEO优化：延迟加载图片
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
             icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';
@@ -232,6 +286,10 @@ function handleSearch() {
         itemsContainer.appendChild(row);
     });
     
+    // SEO优化：更新页面元数据
+    document.title = `搜索"${keyword}"的结果 - 仓鼠签`;
+    document.querySelector('meta[name="description"]').setAttribute('content', `在仓鼠签中搜索"${keyword}"的结果，提供网站和分类导航。`);
+    
     // 应用黑暗模式类
     updateDarkModeClasses();
 }
@@ -254,6 +312,7 @@ function createSearchResultRow(item, keyword, index) {
         img.src = item.icon;
         img.alt = item.name;
         img.className = 'item-favicon';
+        img.loading = 'lazy'; // SEO优化：延迟加载图片
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
             icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';

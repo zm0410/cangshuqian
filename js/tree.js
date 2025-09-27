@@ -51,7 +51,7 @@ class TreeRenderer {
         const toggle = document.createElement('span');
         toggle.className = 'toggle';
         if (hasChildren) {
-            toggle.innerHTML = '▶';
+            toggle.textContent = '▶';
         }
         div.appendChild(toggle);
         
@@ -93,7 +93,7 @@ class TreeRenderer {
             // 如果点击的是切换按钮，则只切换展开/收起状态
             if (e.target === toggle) {
                 li.classList.toggle('expanded');
-                toggle.innerHTML = li.classList.contains('expanded') ? '▼' : '▶';
+                toggle.textContent = li.classList.contains('expanded') ? '▼' : '▶';
                 
                 // 更新文件夹图标状态
                 if (node.type === 'folder') {
@@ -164,7 +164,7 @@ class TreeRenderer {
                     parentNode.classList.add('expanded');
                     const toggle = parentNode.querySelector('.toggle');
                     if (toggle && toggle.innerHTML !== '') {
-                        toggle.innerHTML = '▼';
+                        toggle.textContent = '▼';
                     }
                     
                     // 更新文件夹图标状态
@@ -191,7 +191,7 @@ class TreeRenderer {
         const allToggles = this.container.querySelectorAll('.toggle');
         allToggles.forEach(toggle => {
             if (toggle.innerHTML !== '') {
-                toggle.innerHTML = '▼';
+                toggle.textContent = '▼';
             }
         });
         
@@ -212,7 +212,7 @@ class TreeRenderer {
         const allToggles = this.container.querySelectorAll('.toggle');
         allToggles.forEach(toggle => {
             if (toggle.innerHTML !== '') {
-                toggle.innerHTML = '▶';
+                toggle.textContent = '▶';
             }
         });
         

@@ -4,31 +4,30 @@ let navigationHistory = [];
 let currentNodeId = 'root';
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // 初始化数据管理器和树形渲染器
-    window.dataManager = dataManager;
+    // 初始化树形渲染器
     window.treeRenderer = new TreeRenderer('folderTree', dataManager);
-    
+
     // 加载数据
     try {
         await dataManager.loadData();
         console.log('数据加载完成');
-        
+
         // 渲染树形结构
         treeRenderer.renderTree();
-        
+
         // 默认显示根节点内容
         renderContent('root');
-        
+
         // 初始化导航历史
         navigationHistory = ['root'];
         updateBackButton();
     } catch (error) {
         console.error('数据加载失败:', error);
-        
+        alert('数据加载失败，请检查 data/categories.csv 和 data/sites.csv 格式及内容！');
         // 创建示例数据文件
         createSampleData();
     }
-    
+
     // 绑定搜索功能
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
@@ -36,19 +35,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             handleSearch();
         }
     });
-    
+
     // 监听节点选中事件
     document.addEventListener('nodeSelected', function(e) {
         const nodeId = e.detail.nodeId;
         renderContent(nodeId);
     });
-    
+
     // 黑暗模式切换
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-    
+
     // 返回按钮事件
     document.getElementById('backButton').addEventListener('click', goBack);
-    
+
     // 检查本地存储中的主题设置
     const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
     if (savedTheme === 'dark') {
@@ -61,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 function renderContent(nodeId) {
     // 更新当前节点ID
     currentNodeId = nodeId;
-    
+
     // 更新导航历史（避免重复添加）
     if (navigationHistory[navigationHistory.length - 1] !== nodeId) {
         navigationHistory.push(nodeId);
@@ -70,31 +69,38 @@ function renderContent(nodeId) {
             navigationHistory.shift();
         }
     }
-    
+
     // 更新返回按钮状态
     updateBackButton();
-    
+
     const itemsContainer = document.getElementById('itemsContainer');
     const breadcrumb = document.getElementById('breadcrumb');
-    
+
     // 清空内容
     itemsContainer.innerHTML = '';
     // 保留返回按钮
     const backButton = breadcrumb.querySelector('.back-button');
     breadcrumb.innerHTML = '';
-    breadcrumb.appendChild(backButton);
-    
+    if (backButton) breadcrumb.appendChild(backButton);
+
     // 获取当前节点数据
     const node = dataManager.getNodeById(nodeId);
-    if (!node) return;
-    
+    if (!node) {
+        itemsContainer.innerHTML = '<p>未找到该分类或站点。</p>';
+        return;
+    }
+
     // 渲染面包屑
     renderBreadcrumb(nodeId);
-    
+
     // 获取子项
     const children = dataManager.getChildren(nodeId);
-    
+
     // 渲染子项
+    if (!children || children.length === 0) {
+        // 已移除“暂无内容”提示
+        return;
+    }
     children.forEach((item, index) => {
         const row = createItemRow(item, index);
         itemsContainer.appendChild(row);
@@ -124,13 +130,13 @@ function createItemRow(item, index) {
         img.className = 'item-favicon';
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
-            icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';
+            icon.textContent = item.type === 'folder' ? '📁' : '🔗';
         };
         icon.appendChild(img);
     } else if (item.type === 'folder') {
-        icon.innerHTML = '📁';
+        icon.textContent = '📁';
     } else {
-        icon.innerHTML = '🔗';
+        icon.textContent = '🔗';
     }
     
     const info = document.createElement('div');
@@ -213,25 +219,25 @@ function renderBreadcrumb(nodeId) {
 function handleSearch() {
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) return;
-    
+
     const results = dataManager.search(keyword);
-    
+
     const itemsContainer = document.getElementById('itemsContainer');
     // 保留返回按钮
     const backButton = document.getElementById('backButton');
     itemsContainer.innerHTML = `<h2>搜索结果: "${keyword}"</h2>`;
-    
+
     if (results.length === 0) {
-        itemsContainer.innerHTML += '<p>未找到匹配的结果</p>';
+        itemsContainer.innerHTML += '<p>未找到匹配的结果，请尝试其他关键词。</p>';
         updateDarkModeClasses();
         return;
     }
-    
+
     results.forEach((item, index) => {
         const row = createSearchResultRow(item, keyword, index);
         itemsContainer.appendChild(row);
     });
-    
+
     // 应用黑暗模式类
     updateDarkModeClasses();
 }
@@ -256,13 +262,13 @@ function createSearchResultRow(item, keyword, index) {
         img.className = 'item-favicon';
         img.onerror = function() {
             // 如果图标加载失败，显示默认emoji图标
-            icon.innerHTML = item.type === 'folder' ? '📁' : '🔗';
+            icon.textContent = item.type === 'folder' ? '📁' : '🔗';
         };
         icon.appendChild(img);
     } else if (item.type === 'folder') {
-        icon.innerHTML = '📁';
+        icon.textContent = '📁';
     } else {
-        icon.innerHTML = '🔗';
+        icon.textContent = '🔗';
     }
     
     const info = document.createElement('div');
@@ -308,30 +314,25 @@ function createSearchResultRow(item, keyword, index) {
 
 // 创建示例数据文件
 function createSampleData() {
-    const sampleData = `站点名称,站点图标,站点链接,站点说明,类别1,类别2,类别3,类别4,类别5
-Google,https://www.google.com/favicon.ico,https://www.google.com/,全球最大的搜索引擎,,
-GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,开发工具,,
-MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,开发工具,文档,,
-React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,开发工具,前端框架,,
-Vue,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,开发工具,前端框架,,
-Angular,https://angular.io/assets/images/favicons/favicon.ico,https://angular.io/,现代Web开发平台,开发工具,前端框架,,
-Node.js,https://nodejs.org/static/images/favicons/favicon.ico,https://nodejs.org/,Node.js JavaScript运行时,开发工具,后端框架,,
-Express,https://expressjs.com/images/website-icons/favicon.png,https://expressjs.com/,基于Node.js的web应用框架,开发工具,后端框架,,
-Django,https://www.djangoproject.com/s/img/icon-touch.e4872c4da341.png,https://www.djangoproject.com/,Python Web框架,开发工具,后端框架,,
-Figma,https://static.figma.com/app/icon/1/favicon.ico,https://www.figma.com/,协作式UI设计工具,设计工具,,
-Photoshop,https://www.adobe.com/content/dam/cc/Adobe_favicon.ico,https://www.adobe.com/products/photoshop.html,图像处理软件,设计工具,Adobe,,
-Wikipedia,https://en.wikipedia.org/static/favicon/wikipedia.ico,https://www.wikipedia.org/,自由的百科全书,参考资源,,
-知乎,https://static.zhihu.com/heifetz/favicon.ico,https://www.zhihu.com/,中文问答社区,社交,,
-微博,https://weibo.com/favicon.ico,https://www.weibo.com/,社交媒体平台,社交,,
-AWS EC2,https://a0.awsstatic.com/libra-css/icons/favicons/favicon.ico,https://aws.amazon.com/ec2/,亚马逊云服务器,技术,云服务,AWS,,
-Docker Desktop,https://www.docker.com/favicon.ico,https://www.docker.com/products/docker-desktop/,Docker桌面版,技术,开发运维,容器化,开发环境,,
-Kubernetes Dashboard,https://kubernetes.io/images/favicon.png,https://github.com/kubernetes/dashboard, Kubernetes UI界面,技术,开发运维,容器编排,Kubernetes组件,,
+    const sampleData = `id,title,url,description,category,icon,visible,sort_order
+Google,https://www.google.com/favicon.ico,https://www.google.com/,全球最大的搜索引擎,tech,,1,1
+GitHub,https://github.com/favicon.ico,https://github.com/,全球最大的代码托管平台,dev,,1,1
+MDN,https://developer.mozilla.org/favicon-48x48.cbbd161b.png,https://developer.mozilla.org/,Web开发文档资源,frontend,,1,1
+React,https://reactjs.org/favicon.ico,https://reactjs.org/,用于构建用户界面的JavaScript库,framework,,1,1
+Vue,https://vuejs.org/images/logo.png,https://vuejs.org/,渐进式JavaScript框架,framework,,1,2
+Angular,https://angular.io/assets/images/favicons/favicon.ico,https://angular.io/,现代Web开发平台,framework,,1,3
 `;
 
-    console.log('请在项目根目录下创建data文件夹，并在其中创建bookmarks.csv文件，内容如下:');
+    console.log('请在项目根目录下创建data文件夹，并在其中创建sites.csv和categories.csv文件，内容如下:');
+    console.log('categories.csv:');
+    console.log('id,name,parent,sort_order');
+    console.log('tech,科技,,1');
+    console.log('dev,开发,,2');
+    console.log('');
+    console.log('sites.csv:');
     console.log(sampleData);
     
-    alert('请创建 data/bookmarks.csv 文件，内容可参考控制台输出');
+    alert('请创建 data/categories.csv 和 data/sites.csv 文件，内容可参考控制台输出');
 }
 
 // 切换主题

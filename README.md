@@ -30,13 +30,39 @@
 
 ## 数据维护
 
-编辑 [data/bookmarks.csv](data/bookmarks.csv) 文件来管理网址数据：
+数据通过两个 CSV 文件维护：
 
-```csv
-站点名称,站点图标,站点链接,站点说明,类别1,类别2,类别3,类别4,类别5
+1. [data/categories.csv](data/categories.csv) - 定义分类结构
+2. [data/sites.csv](data/sites.csv) - 定义网站链接
+
+### categories.csv 格式
+
+```
+id,name,parent,sort_order
 ```
 
-数据文件采用 CSV 格式，支持最多 5 级分类。网址信息包括名称、图标链接、网址链接和说明。
+- `id` - 分类唯一标识符
+- `name` - 分类名称
+- `parent` - 父级分类ID（根分类留空）
+- `sort_order` - 排序顺序
+
+### sites.csv 格式
+
+```
+id,title,url,desc,category,icon,visible,sort_order
+```
+
+- `id` - 网站唯一标识符
+- `title` - 网站标题
+- `url` - 网站链接
+- `desc` - 网站描述
+- `category` - 所属分类ID
+- `icon` - 网站图标链接（可选）
+- `visible` - 是否可见（1为可见，0为隐藏）
+- `sort_order` - 排序顺序
+
+数据文件采用 CSV 格式，支持任意层级深度的分类结构。网址信息包括名称、图标链接、网址链接和说明。
+
 
 ## 使用说明
 
@@ -53,7 +79,8 @@
 ├── css/
 │   └── style.css          # 样式文件
 ├── data/
-│   └── bookmarks.csv      # 网址数据文件
+│   ├── categories.csv     # 分类数据文件
+│   └── sites.csv          # 网站数据文件
 ├── js/
 │   ├── data.js            # 数据处理逻辑
 │   ├── main.js            # 主要交互逻辑
@@ -67,7 +94,8 @@
 
 你可以通过修改以下文件来自定义网站：
 
-- [data/bookmarks.csv](data/bookmarks.csv) - 更新网址数据
+- [data/categories.csv](data/categories.csv) - 更新分类结构
+- [data/sites.csv](data/sites.csv) - 更新网址数据
 - [css/style.css](css/style.css) - 修改样式
 - [js/data.js](js/data.js) - 修改数据处理逻辑
 - [js/main.js](js/main.js) - 修改交互逻辑

@@ -1,8 +1,19 @@
 // 主应用逻辑
-// 存储当前路径历史记录
+/**
+ * 导航历史记录
+ * @type {Array<string>}
+ */
 let navigationHistory = [];
+
+/**
+ * 当前节点ID
+ * @type {string}
+ */
 let currentNodeId = 'root';
 
+/**
+ * DOM内容加载完成后初始化应用
+ */
 document.addEventListener('DOMContentLoaded', async function() {
     // 初始化树形渲染器
     window.treeRenderer = new TreeRenderer('folderTree', dataManager);
@@ -48,6 +59,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 返回按钮事件
     document.getElementById('backButton').addEventListener('click', goBack);
 
+    // Logo和网站标题点击事件 - 返回首页
+    document.getElementById('logoContainer').addEventListener('click', function(e) {
+        // 防止在点击搜索框等子元素时触发
+        if (e.target === this || e.target.classList.contains('website-logo') || e.target.id === 'siteTitle') {
+            goToHome();
+        }
+    });
+    document.getElementById('siteTitle').addEventListener('click', goToHome);
+
     // 检查本地存储中的主题设置
     const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
     if (savedTheme === 'dark') {
@@ -56,7 +76,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// 渲染内容区域
+/**
+ * 渲染内容区域
+ * @param {string} nodeId - 节点ID
+ */
 function renderContent(nodeId) {
     // 更新当前节点ID
     currentNodeId = nodeId;
@@ -98,7 +121,7 @@ function renderContent(nodeId) {
 
     // 渲染子项
     if (!children || children.length === 0) {
-        // 已移除“暂无内容”提示
+        // 已移除"暂无内容"提示
         return;
     }
     children.forEach((item, index) => {
@@ -110,7 +133,12 @@ function renderContent(nodeId) {
     updateDarkModeClasses();
 }
 
-// 创建项目行元素
+/**
+ * 创建项目行元素
+ * @param {Object} item - 项目数据
+ * @param {number} index - 索引
+ * @returns {HTMLElement} 项目行元素
+ */
 function createItemRow(item, index) {
     const row = document.createElement('div');
     row.className = `item-row ${item.type}`;
@@ -180,7 +208,10 @@ function createItemRow(item, index) {
     return row;
 }
 
-// 渲染面包屑导航
+/**
+ * 渲染面包屑导航
+ * @param {string} nodeId - 节点ID
+ */
 function renderBreadcrumb(nodeId) {
     const breadcrumb = document.getElementById('breadcrumb');
     
@@ -215,7 +246,9 @@ function renderBreadcrumb(nodeId) {
     updateDarkModeClasses();
 }
 
-// 处理搜索
+/**
+ * 处理搜索
+ */
 function handleSearch() {
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) return;
@@ -242,7 +275,13 @@ function handleSearch() {
     updateDarkModeClasses();
 }
 
-// 创建搜索结果行元素
+/**
+ * 创建搜索结果行元素
+ * @param {Object} item - 项目数据
+ * @param {string} keyword - 搜索关键词
+ * @param {number} index - 索引
+ * @returns {HTMLElement} 搜索结果行元素
+ */
 function createSearchResultRow(item, keyword, index) {
     const row = document.createElement('div');
     row.className = `item-row ${item.type}`;
@@ -312,7 +351,9 @@ function createSearchResultRow(item, keyword, index) {
     return row;
 }
 
-// 创建示例数据文件
+/**
+ * 创建示例数据文件
+ */
 function createSampleData() {
     const sampleData = `id,title,url,description,category,icon,visible,sort_order
 Google,https://www.google.com/favicon.ico,https://www.google.com/,全球最大的搜索引擎,tech,,1,1
@@ -335,7 +376,9 @@ Angular,https://angular.io/assets/images/favicons/favicon.ico,https://angular.io
     alert('请创建 data/categories.csv 和 data/sites.csv 文件，内容可参考控制台输出');
 }
 
-// 切换主题
+/**
+ * 切换主题
+ */
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     
@@ -353,7 +396,9 @@ function toggleTheme() {
     updateDarkModeClasses();
 }
 
-// 更新主题图标
+/**
+ * 更新主题图标
+ */
 function updateThemeIcons() {
     const themeToggle = document.getElementById('themeToggle');
     if (document.body.classList.contains('dark-mode')) {
@@ -363,13 +408,15 @@ function updateThemeIcons() {
     }
 }
 
-// 更新黑暗模式类
+/**
+ * 更新黑暗模式类
+ */
 function updateDarkModeClasses() {
     const elements = document.querySelectorAll(
         '.sidebar, .items-container, .breadcrumb, .search-box input, .search-box button, ' +
         '.tree-item:hover, .tree-item.selected, .breadcrumb-item:hover, .item-row, ' +
         '.item-description, .item-url, .breadcrumb-separator, .back-button, .content-header, ' +
-        'mark'
+        'mark, .website-logo'
     );
     
     elements.forEach(element => {
@@ -381,7 +428,9 @@ function updateDarkModeClasses() {
     });
 }
 
-// 返回上一级
+/**
+ * 返回上一级
+ */
 function goBack() {
     if (navigationHistory.length <= 1) {
         return; // 已经在根目录，无法再返回
@@ -398,9 +447,23 @@ function goBack() {
     renderContent(previousNodeId);
 }
 
-// 更新返回按钮状态
+/**
+ * 更新返回按钮状态
+ */
 function updateBackButton() {
     const backButton = document.getElementById('backButton');
     // 如果在根目录，则禁用返回按钮
     backButton.disabled = navigationHistory.length <= 1;
+}
+
+/**
+ * 返回首页
+ */
+function goToHome() {
+    // 清空搜索框
+    document.getElementById('searchInput').value = '';
+    
+    // 选中根节点
+    treeRenderer.selectNode('root');
+    renderContent('root');
 }

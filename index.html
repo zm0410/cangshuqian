@@ -5,11 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>仓鼠签 - 简约高效的导航网站</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L4DP4G06QK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L4DP4G06QK');
+    </script>
+    <!-- End Google Analytics -->
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>仓鼠签</h1>
+            <div class="logo-container" id="logoContainer">
+                <img src="logo.svg" alt="仓鼠签Logo" class="website-logo">
+                <h1 id="siteTitle">仓鼠签</h1>
+            </div>
             <div class="header-controls">
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="搜索...">

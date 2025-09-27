@@ -1,3 +1,8 @@
+/* 
+ * 仓鼠签 - 网址导航网站样式表
+ * 仿 Windows 资源管理器风格设计
+ */
+
 /* 全局样式 */
 * {
     margin: 0;
@@ -32,15 +37,15 @@ body.dark-mode {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #333;
-    padding: 10px 15px; /* 减少内边距以适应移动端 */
+    padding: 10px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.5);
     animation: fadeInDown 0.5s ease-out;
-    flex-wrap: wrap; /* 允许换行 */
-    gap: 8px; /* 添加元素间距 */
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .header.dark-mode {
@@ -49,39 +54,96 @@ body.dark-mode {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.header.dark-mode h1 {
+    color: #967151;
+}
+
 .header h1 {
     font-size: 1.5rem;
     white-space: nowrap;
+    color: #967151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    padding: 0;
+}
+
+.header h1:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
 }
 
 .header-controls {
     display: flex;
     align-items: center;
-    gap: 8px; /* 减少控件间距 */
+    gap: 8px;
     flex-wrap: wrap;
-    min-width: 0; /* 允许搜索框收缩 */
+    min-width: 0;
+}
+
+/* Logo样式 */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 10px;
+}
+
+.logo-container:hover {
+    background: rgba(150, 113, 81, 0.1);
+    transform: scale(1.02);
+}
+
+.website-logo {
+    height: 40px;
+    width: 40px;
+    animation: slideInLeft 0.5s ease-out;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px;
+    margin: 0;
+}
+
+.website-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.website-logo.dark-mode {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.website-logo.dark-mode:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .search-box {
     display: flex;
-    gap: 8px; /* 减少搜索框内元素间距 */
+    gap: 8px;
     padding: 8px 0;
     flex: 1;
-    min-width: 0; /* 允许搜索框收缩 */
+    min-width: 0;
 }
 
 .search-box input {
-    padding: 6px 10px; /* 减少输入框内边距 */
+    padding: 6px 10px;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
-    width: 100%; /* 调整为100%宽度 */
-    min-width: 0; /* 允许收缩 */
+    width: 100%;
+    min-width: 0;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out;
-    font-size: 14px; /* 调整字体大小 */
+    font-size: 14px;
 }
 
 .search-box input:focus {
@@ -101,20 +163,13 @@ body.dark-mode {
     box-shadow: 0 0 0 2px rgba(0, 120, 215, 0.3);
 }
 
-.search-box input::-webkit-input-placeholder {
-    font-size: 13px;
-}
-
-.search-box input::-moz-placeholder {
-    font-size: 13px;
-}
-
-.search-box input:-ms-input-placeholder {
+/* 统一占位符样式 */
+.search-box input::placeholder {
     font-size: 13px;
 }
 
 .search-box button {
-    padding: 6px 12px; /* 减少按钮内边距 */
+    padding: 6px 12px;
     background: rgba(255, 255, 255, 0.8);
     color: #0078d7;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -125,7 +180,7 @@ body.dark-mode {
     -webkit-backdrop-filter: blur(5px);
     transition: all 0.3s ease;
     animation: slideInRight 0.5s ease-out 0.1s both;
-    font-size: 14px; /* 调整字体大小 */
+    font-size: 14px;
     white-space: nowrap;
 }
 
@@ -157,9 +212,9 @@ body.dark-mode {
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.1);
     color: #333;
-    font-size: 1.1rem; /* 调整图标大小 */
+    font-size: 1.1rem;
     cursor: pointer;
-    width: 40px; /* 调整按钮大小 */
+    width: 40px;
     height: 40px;
     border-radius: 50%;
     display: flex;
@@ -170,7 +225,7 @@ body.dark-mode {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     animation: slideInRight 0.5s ease-out 0.2s both;
-    flex-shrink: 0; /* 防止按钮收缩 */
+    flex-shrink: 0;
     position: relative;
     overflow: hidden;
 }
@@ -182,7 +237,7 @@ body.dark-mode {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    background: radial-gradient(circle, rgba(248,239,230,0.8) 0%, rgba(248,239,230,0) 70%);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -222,13 +277,13 @@ body.dark-mode {
     display: flex;
     flex: 1;
     overflow: hidden;
-    padding: 8px; /* 减少主内容区域的内边距 */
+    padding: 8px;
     animation: fadeIn 0.8s ease-out;
 }
 
 /* 侧边栏样式 */
 .sidebar {
-    width: 280px; /* 减少侧边栏宽度 */
+    width: 280px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -236,9 +291,9 @@ body.dark-mode {
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     overflow-y: auto;
-    padding: 8px 0; /* 减少内边距 */
+    padding: 8px 0;
     transition: background-color 0.3s, border-color 0.3s;
-    margin-right: 8px; /* 减少右边距 */
+    margin-right: 8px;
     animation: slideInLeft 0.5s ease-out;
 }
 
@@ -248,7 +303,7 @@ body.dark-mode {
 }
 
 .folder-tree {
-    padding: 0 8px; /* 减少树形结构的内边距 */
+    padding: 0 8px;
 }
 
 .tree-node {
@@ -258,7 +313,7 @@ body.dark-mode {
 }
 
 .tree-node ul {
-    margin-left: 16px; /* 减少子节点的左边距 */
+    margin-left: 16px;
     display: none;
     transition: all 0.3s ease;
     animation: slideInLeft 0.3s ease-out;
@@ -269,17 +324,17 @@ body.dark-mode {
 }
 
 .tree-item {
-    padding: 6px 8px; /* 减少节点内边距 */
+    padding: 6px 8px;
     cursor: pointer;
     border-radius: 6px;
     display: flex;
     align-items: center;
-    gap: 6px; /* 减少元素间距 */
-    margin: 1px 0; /* 减少节点间距 */
+    gap: 6px;
+    margin: 1px 0;
     transition: all 0.2s ease;
     animation: fadeIn 0.3s ease-out;
-    font-size: 14px; /* 调整字体大小 */
-    min-height: 36px; /* 增加最小高度，便于触摸 */
+    font-size: 14px;
+    min-height: 36px;
 }
 
 .tree-item:hover {
@@ -307,7 +362,7 @@ body.dark-mode {
 
 .tree-link-item:hover {
     background-color: rgba(0, 120, 215, 0.1);
-    transform: translateX(2px); /* 减少悬停位移 */
+    transform: translateX(2px);
 }
 
 .tree-link-item:hover.dark-mode {
@@ -315,7 +370,7 @@ body.dark-mode {
 }
 
 .tree-item .icon {
-    width: 14px; /* 减少图标大小 */
+    width: 14px;
     height: 14px;
     display: flex;
     align-items: center;
@@ -329,13 +384,13 @@ body.dark-mode {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px; /* 调整切换按钮字体大小 */
+    font-size: 10px;
     transition: transform 0.2s ease;
     flex-shrink: 0;
 }
 
 .tree-item .toggle:hover {
-    transform: scale(1.1); /* 减少悬停缩放 */
+    transform: scale(1.1);
 }
 
 .folder-icon::before {
@@ -375,15 +430,15 @@ body.dark-mode {
 .content-header {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* 减少元素间距 */
-    padding: 0 8px; /* 调整内边距 */
+    gap: 8px;
+    padding: 0 8px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 8px; /* 减少下边距 */
+    margin-bottom: 8px;
     animation: slideInDown 0.5s ease-out;
 }
 
@@ -395,68 +450,89 @@ body.dark-mode {
 .breadcrumb {
     display: flex;
     align-items: center;
-    gap: 8px; /* 减少元素间距 */
-    padding: 4px 0; /* 减少内边距 */
-    flex-wrap: wrap; /* 允许换行 */
+    gap: 8px;
+    padding: 4px 0;
+    flex-wrap: wrap;
 }
 
 .back-button {
-    background: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    padding: 4px 8px; /* 减少内边距 */
+    background: linear-gradient(to bottom, #ffffff, #f5f5f5);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 6px 12px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 13px; /* 调整字体大小 */
+    font-size: 14px;
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
     transition: all 0.2s ease;
     animation: slideInLeft 0.3s ease-out;
-    white-space: nowrap; /* 防止按钮文字换行 */
-    min-height: 32px; /* 增加最小高度，便于触摸 */
+    white-space: nowrap;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+    color: #333;
 }
 
 .back-button:hover:not(:disabled) {
-    background: rgba(240, 240, 240, 0.9);
+    background: linear-gradient(to bottom, #ffffff, #ebebeb);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transform: translateY(-1px);
 }
 
 .back-button:active:not(:disabled) {
-    background: rgba(220, 220, 220, 0.9);
+    background: linear-gradient(to bottom, #e0e0e0, #f0f0f0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.1);
     transform: translateY(0);
 }
 
 .back-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .back-button.dark-mode {
-    background: rgba(77, 77, 77, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(to bottom, #4a4a4a, #3a3a3a);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     color: #eee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5);
 }
 
 .back-button.dark-mode:hover:not(:disabled) {
-    background: rgba(90, 90, 90, 0.9);
+    background: linear-gradient(to bottom, #505050, #404040);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .back-button.dark-mode:active:not(:disabled) {
-    background: rgba(110, 110, 110, 0.9);
+    background: linear-gradient(to bottom, #303030, #404040);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.back-button.back-button-active:not(:disabled) {
+    background: linear-gradient(to bottom, #e0e0e0, #f0f0f0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+.back-button.dark-mode.back-button-active:not(:disabled) {
+    background: linear-gradient(to bottom, #303030, #404040);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .breadcrumb-item {
     cursor: pointer;
-    padding: 3px 6px; /* 减少内边距 */
+    padding: 3px 6px;
     border-radius: 5px;
     transition: all 0.2s ease;
     animation: fadeIn 0.3s ease-out;
-    font-size: 13px; /* 调整字体大小 */
-    white-space: nowrap; /* 防止文字换行 */
-    min-height: 32px; /* 增加最小高度，便于触摸 */
+    font-size: 13px;
+    white-space: nowrap;
+    min-height: 32px;
     display: flex;
     align-items: center;
 }
@@ -473,7 +549,7 @@ body.dark-mode {
 .breadcrumb-separator {
     color: #999;
     animation: fadeIn 0.3s ease-out;
-    font-size: 13px; /* 调整字体大小 */
+    font-size: 13px;
 }
 
 .breadcrumb-separator.dark-mode {
@@ -483,10 +559,10 @@ body.dark-mode {
 .items-container {
     flex: 1;
     overflow-y: auto;
-    padding: 8px; /* 减少内边距 */
+    padding: 8px;
     display: flex;
     flex-direction: column;
-    gap: 8px; /* 减少元素间距 */
+    gap: 8px;
     transition: background-color 0.3s;
     border-radius: 10px;
     animation: fadeIn 0.5s ease-out;
@@ -502,21 +578,21 @@ body.dark-mode {
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 10px;
-    padding: 12px; /* 减少内边距 */
+    padding: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 12px; /* 减少元素间距 */
+    gap: 12px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     animation: slideInUp 0.4s ease-out;
-    min-height: 56px; /* 增加最小高度，便于触摸 */
+    min-height: 56px;
 }
 
 .item-row:hover {
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px); /* 减少悬停位移 */
+    transform: translateY(-1px);
 }
 
 .item-row:hover.dark-mode {
@@ -525,7 +601,7 @@ body.dark-mode {
 }
 
 .item-row.folder {
-    border-left: 3px solid #ffd700; /* 减少边框宽度 */
+    border-left: 3px solid #ffd700;
 }
 
 .item-row.link {
@@ -538,18 +614,18 @@ body.dark-mode {
 }
 
 .item-icon {
-    width: 28px; /* 减少图标大小 */
+    width: 28px;
     height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px; /* 调整字体大小 */
+    font-size: 20px;
     flex-shrink: 0;
     animation: bounceIn 0.5s ease-out;
 }
 
 .item-favicon {
-    width: 20px; /* 减少favicon大小 */
+    width: 20px;
     height: 20px;
     object-fit: contain;
 }
@@ -558,22 +634,22 @@ body.dark-mode {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px; /* 减少元素间距 */
-    min-width: 0; /* 允许内容收缩 */
+    gap: 4px;
+    min-width: 0;
 }
 
 .item-title {
     font-weight: 600;
-    font-size: 15px; /* 调整字体大小 */
+    font-size: 15px;
     animation: fadeIn 0.3s ease-out;
-    word-break: break-word; /* 允许标题换行 */
+    word-break: break-word;
 }
 
 .item-description {
-    font-size: 13px; /* 调整字体大小 */
+    font-size: 13px;
     color: #666;
     animation: fadeIn 0.3s ease-out 0.1s both;
-    word-break: break-word; /* 允许描述换行 */
+    word-break: break-word;
 }
 
 .item-description.dark-mode {
@@ -581,10 +657,10 @@ body.dark-mode {
 }
 
 .item-url {
-    font-size: 12px; /* 调整字体大小 */
+    font-size: 12px;
     color: #0078d7;
     animation: fadeIn 0.3s ease-out 0.2s both;
-    word-break: break-all; /* 允许URL换行 */
+    word-break: break-all;
 }
 
 .item-url.dark-mode {
@@ -608,12 +684,8 @@ mark.dark-mode {
 
 /* 动画关键帧 */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes fadeInDown {
@@ -672,37 +744,26 @@ mark.dark-mode {
 }
 
 @keyframes bounceIn {
-    from,
-    20%,
-    40%,
-    60%,
-    80%,
-    to {
+    from, 20%, 40%, 60%, 80%, to {
         animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
     }
-
     0% {
         opacity: 0;
         transform: scale3d(0.3, 0.3, 0.3);
     }
-
     20% {
         transform: scale3d(1.1, 1.1, 1.1);
     }
-
     40% {
         transform: scale3d(0.9, 0.9, 0.9);
     }
-
     60% {
         opacity: 1;
         transform: scale3d(1.03, 1.03, 1.03);
     }
-
     80% {
         transform: scale3d(0.97, 0.97, 0.97);
     }
-
     to {
         opacity: 1;
         transform: scale3d(1, 1, 1);
@@ -750,6 +811,24 @@ mark.dark-mode {
     
     .header h1 {
         font-size: 1.3rem;
+        color: #967151;
+    }
+    
+    .logo-container {
+        gap: 6px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 8px;
+    }
+    
+    .logo-container:hover {
+        background: rgba(150, 113, 81, 0.1);
+        transform: scale(1.02);
+    }
+    
+    .website-logo {
+        height: 36px;
+        width: 36px;
     }
     
     .header-controls {
@@ -770,15 +849,7 @@ mark.dark-mode {
         min-height: 36px;
     }
     
-    .search-box input::-webkit-input-placeholder {
-        font-size: 12px;
-    }
-    
-    .search-box input::-moz-placeholder {
-        font-size: 12px;
-    }
-    
-    .search-box input:-ms-input-placeholder {
+    .search-box input::placeholder {
         font-size: 12px;
     }
     
@@ -841,6 +912,8 @@ mark.dark-mode {
         padding: 6px 10px;
         font-size: 13px;
         min-height: 36px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
     
     .breadcrumb-item {
@@ -864,6 +937,12 @@ mark.dark-mode {
         padding: 12px;
         gap: 12px;
         min-height: 60px;
+    }
+    
+    .item-row:hover {
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
     }
     
     .item-icon {
@@ -898,6 +977,14 @@ mark.dark-mode {
         height: 40px;
         font-size: 1.2rem;
     }
+    
+    .theme-toggle:hover {
+        background: rgba(248, 239, 230, 0.95);
+    }
+    
+    .theme-toggle::before {
+        background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+    }
 }
 
 /* 小屏幕设备优化 */
@@ -909,6 +996,24 @@ mark.dark-mode {
     
     .header h1 {
         font-size: 1.2rem;
+        color: #967151;
+    }
+    
+    .logo-container {
+        gap: 5px;
+        cursor: pointer;
+        padding: 3px 5px;
+        border-radius: 7px;
+    }
+    
+    .logo-container:hover {
+        background: rgba(150, 113, 81, 0.1);
+        transform: scale(1.02);
+    }
+    
+    .website-logo {
+        height: 32px;
+        width: 32px;
     }
     
     .sidebar {
@@ -942,6 +1047,8 @@ mark.dark-mode {
         padding: 5px 8px;
         font-size: 12px;
         min-height: 32px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
     
     .breadcrumb-item {
@@ -950,21 +1057,16 @@ mark.dark-mode {
         min-height: 32px;
     }
     
+    .content-header {
+    }
+    
     .search-box input {
         padding: 6px 8px;
         font-size: 13px;
         min-height: 32px;
     }
     
-    .search-box input::-webkit-input-placeholder {
-        font-size: 11px;
-    }
-    
-    .search-box input::-moz-placeholder {
-        font-size: 11px;
-    }
-    
-    .search-box input:-ms-input-placeholder {
+    .search-box input::placeholder {
         font-size: 11px;
     }
     
@@ -990,6 +1092,24 @@ mark.dark-mode {
     
     .header h1 {
         font-size: 1.1rem;
+        color: #967151;
+    }
+    
+    .logo-container {
+        gap: 4px;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 6px;
+    }
+    
+    .logo-container:hover {
+        background: rgba(150, 113, 81, 0.1);
+        transform: scale(1.02);
+    }
+    
+    .website-logo {
+        height: 28px;
+        width: 28px;
     }
     
     .header-controls {
@@ -1006,15 +1126,7 @@ mark.dark-mode {
         min-height: 30px;
     }
     
-    .search-box input::-webkit-input-placeholder {
-        font-size: 10px;
-    }
-    
-    .search-box input::-moz-placeholder {
-        font-size: 10px;
-    }
-    
-    .search-box input:-ms-input-placeholder {
+    .search-box input::placeholder {
         font-size: 10px;
     }
     
@@ -1055,6 +1167,8 @@ mark.dark-mode {
         padding: 4px 6px;
         font-size: 11px;
         min-height: 30px;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
     
     .breadcrumb-item {

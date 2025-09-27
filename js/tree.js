@@ -1,12 +1,23 @@
 // 树形组件模块
+/**
+ * 树形渲染器类
+ * 负责渲染和管理网站分类的树形结构
+ */
 class TreeRenderer {
+    /**
+     * 构造函数
+     * @param {string} containerId - 容器元素ID
+     * @param {DataManager} dataManager - 数据管理器实例
+     */
     constructor(containerId, dataManager) {
         this.container = document.getElementById(containerId);
         this.dataManager = dataManager;
         this.selectedNodeId = 'root';
     }
 
-    // 渲染整个树
+    /**
+     * 渲染整个树
+     */
     renderTree() {
         this.container.innerHTML = '';
         const treeRoot = this.dataManager.treeData;
@@ -24,7 +35,13 @@ class TreeRenderer {
         }
     }
 
-    // 创建树节点
+    /**
+     * 创建树节点
+     * @param {Object} node - 节点数据
+     * @param {boolean} isRoot - 是否为根节点
+     * @param {number} depth - 节点深度
+     * @returns {HTMLElement} 节点元素
+     */
     createTreeNode(node, isRoot = false, depth = 0) {
         const li = document.createElement('li');
         li.className = 'tree-node';
@@ -128,7 +145,10 @@ class TreeRenderer {
         return li;
     }
 
-    // 选中节点
+    /**
+     * 选中节点
+     * @param {string} nodeId - 节点ID
+     */
     selectNode(nodeId) {
         this.selectedNodeId = nodeId;
         
@@ -152,7 +172,10 @@ class TreeRenderer {
         document.dispatchEvent(event);
     }
 
-    // 展开到指定节点的路径
+    /**
+     * 展开到指定节点的路径
+     * @param {string} nodeId - 节点ID
+     */
     expandToNode(nodeId) {
         // 获取路径并展开
         const path = this.dataManager.getPathToNode(nodeId);
@@ -179,7 +202,9 @@ class TreeRenderer {
         });
     }
 
-    // 展开所有节点
+    /**
+     * 展开所有节点
+     */
     expandAll() {
         const allNodes = this.container.querySelectorAll('.tree-node');
         allNodes.forEach(node => {
@@ -202,7 +227,9 @@ class TreeRenderer {
         });
     }
 
-    // 收起所有节点
+    /**
+     * 收起所有节点
+     */
     collapseAll() {
         const allNodes = this.container.querySelectorAll('.tree-node');
         allNodes.forEach(node => {

@@ -1,26 +1,51 @@
+/**
+ * 数据管理类
+ * 负责加载和处理网站的分类和链接数据
+ */
 class DataManager {
     constructor() {
+        /** @type {Array<Object>} 所有数据项列表 */
         this.data = [];
+        
+        /** @type {Object} 树形结构数据 */
         this.treeData = {};
+        
+        /** @type {Object} 节点映射表 */
         this.nodeMap = {};
+        
+        /** @type {Array<Object>} 分类数据 */
         this.categories = [];
+        
+        /** @type {Array<Object>} 网站链接数据 */
         this.sites = [];
     }
 
-    // 加载 categories.csv 和 sites.csv
+    /**
+     * 加载 categories.csv 和 sites.csv
+     * @returns {Promise<Array>} 返回加载的数据
+     */
     async loadData() {
-        const [categories, sites] = await Promise.all([
-            this.loadCsv('data/categories.csv'),
-            this.loadCsv('data/sites.csv')
-        ]);
-        this.categories = categories;
-        this.sites = sites.filter(site => site.visible === '1' || site.visible === 1);
-        this.data = this.buildDataFromCategoriesAndSites();
-        this.buildTree();
-        return this.data;
+        try {
+            const [categories, sites] = await Promise.all([
+                this.loadCsv('data/categories.csv'),
+                this.loadCsv('data/sites.csv')
+            ]);
+            this.categories = categories;
+            this.sites = sites.filter(site => site.visible === '1' || site.visible === 1);
+            this.data = this.buildDataFromCategoriesAndSites();
+            this.buildTree();
+            return this.data;
+        } catch (error) {
+            console.error('数据加载失败:', error);
+            throw error;
+        }
     }
 
-    // 通用 CSV 加载
+    /**
+     * 通用 CSV 加载
+     * @param {string} url - CSV文件URL
+     * @returns {Promise<Array>} 解析后的数据数组
+     */
     loadCsv(url) {
         return new Promise((resolve, reject) => {
             Papa.parse(url, {
@@ -37,7 +62,10 @@ class DataManager {
         });
     }
 
-    // 根据 categories 和 sites 构建统一数据结构
+    /**
+     * 根据 categories 和 sites 构建统一数据结构
+     * @returns {Array<Object>} 构建后的数据数组
+     */
     buildDataFromCategoriesAndSites() {
         const categoryMap = {};
         this.categories.forEach(cat => {
@@ -61,7 +89,7 @@ class DataManager {
                     const urlObj = new URL(site.url);
                     icon = urlObj.origin + '/favicon.ico';
                 } catch (e) {
-                    icon = '';
+                    // URL无效时保持icon为空
                 }
             }
             return {
@@ -81,6 +109,9 @@ class DataManager {
         ];
     }
 
+    /**
+     * 构建树形结构
+     */
     buildTree() {
         this.nodeMap = {};
         this.data.forEach(item => {
@@ -127,6 +158,11 @@ class DataManager {
         this.treeData.children.sort((a, b) => a.sort_order - b.sort_order);
     }
 
+    /**
+     * 获取指定节点的子节点
+     * @param {string} parentId - 父节点ID
+     * @returns {Array<Object>} 子节点数组
+     */
     getChildren(parentId) {
         if (!parentId) {
             return this.treeData.children || [];
@@ -135,6 +171,11 @@ class DataManager {
         return node ? (node.children || []) : [];
     }
 
+    /**
+     * 根据ID获取节点
+     * @param {string} id - 节点ID
+     * @returns {Object|null} 节点对象或null
+     */
     getNodeById(id) {
         if (id === 'root') {
             return this.treeData;
@@ -142,6 +183,11 @@ class DataManager {
         return this.nodeMap[id] || null;
     }
 
+    /**
+     * 获取到指定节点的路径
+     * @param {string} id - 节点ID
+     * @returns {Array<Object>} 路径节点数组
+     */
     getPathToNode(id) {
         const path = [];
         if (id === 'root') {
@@ -166,6 +212,11 @@ class DataManager {
         return [];
     }
 
+    /**
+     * 搜索功能
+     * @param {string} keyword - 搜索关键词
+     * @returns {Array<Object>} 搜索结果数组
+     */
     search(keyword) {
         if (!keyword) return [];
         keyword = keyword.toLowerCase().trim();
@@ -199,6 +250,12 @@ class DataManager {
         return results;
     }
 
+    /**
+     * 高亮搜索关键词
+     * @param {string} text - 原始文本
+     * @param {string} keyword - 搜索关键词
+     * @returns {string} 高亮处理后的文本
+     */
     highlightKeyword(text, keyword) {
         if (!text || !keyword) return text;
         const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
@@ -218,5 +275,3 @@ class DataManager {
 
 // 导出数据管理器实例
 const dataManager = new DataManager();
-window.dataManager = dataManager;
-

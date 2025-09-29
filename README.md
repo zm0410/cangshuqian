@@ -147,10 +147,10 @@ id,title,url,description,category,icon,visible,sort_order
 │   ├── data.js            # 数据管理类，负责加载和处理CSV数据
 │   ├── main.js            # 主要交互逻辑，包括页面渲染和事件处理
 │   ├── tree.js            # 树形结构渲染器，负责左侧分类树的展示
-│   └── admin.js           # 数据管理工具脚本
+│   └── manage.js          # 数据管理工具脚本
 ├── favicon.ico            # 网站图标
 ├── index.html             # 主页面
-├── admin.html             # 数据管理工具页面
+├── manage.html            # 数据管理工具页面
 ├── logo.svg               # 网站Logo（SVG格式）
 └── README.md              # 项目说明文件
 ```
@@ -168,6 +168,7 @@ id,title,url,description,category,icon,visible,sort_order
 - [js/data.js](js/data.js) - 修改数据处理逻辑，如添加新的数据字段
 - [js/main.js](js/main.js) - 修改主交互逻辑，如添加新的页面功能
 - [js/tree.js](js/tree.js) - 修改树形结构逻辑，如调整分类展示方式
+- [js/manage.js](js/manage.js) - 修改数据管理工具逻辑
 
 ### 品牌定制
 - [logo.svg](logo.svg) - 替换为自定义Logo

@@ -3,52 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>仓鼠签 - 数据管理工具</title>
+    <title>网站数据管理工具</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <style>
-        .admin-container {
-            max-width: 1200px;
+        .manage-container {
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
         
-        .admin-header {
+        .manage-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
-        .admin-tabs {
+        .manage-tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
-        .admin-tab {
+        .manage-tab {
             padding: 10px 20px;
             background: rgba(255, 255, 255, 0.7);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
         
-        .admin-tab.active {
+        .manage-tab.dark-mode {
+            background: rgba(45, 45, 45, 0.7);
+        }
+        
+        .manage-tab.active {
             background: rgba(0, 120, 215, 0.2);
             color: #0078d7;
             font-weight: bold;
         }
         
-        .admin-tab:hover:not(.active) {
+        .manage-tab.active.dark-mode {
+            background: rgba(0, 120, 215, 0.3);
+            color: #4da6ff;
+        }
+        
+        .manage-tab:hover:not(.active) {
             background: rgba(0, 0, 0, 0.05);
         }
         
-        .admin-content {
+        .manage-tab:hover:not(.active).dark-mode {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .manage-content {
             background: rgba(255, 255, 255, 0.7);
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .manage-content.dark-mode {
+            background: rgba(45, 45, 45, 0.7);
         }
         
         .data-table {
@@ -69,13 +90,27 @@
             font-weight: bold;
         }
         
+        .data-table th.dark-mode,
+        .data-table td.dark-mode {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th.dark-mode {
+            background: rgba(0, 120, 215, 0.2);
+        }
+        
         .data-table tr:hover {
             background: rgba(0, 120, 215, 0.05);
         }
         
+        .data-table tr:hover.dark-mode {
+            background: rgba(0, 120, 215, 0.1);
+        }
+        
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -85,6 +120,7 @@
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
         
         .btn-primary {
@@ -114,6 +150,15 @@
             background: #218838;
         }
         
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
         .form-group {
             margin-bottom: 15px;
         }
@@ -132,16 +177,27 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 14px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .form-group input.dark-mode,
+        .form-group select.dark-mode,
+        .form-group textarea.dark-mode {
+            background: rgba(51, 51, 51, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
         
         .form-row {
             display: flex;
             gap: 15px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
         .form-col {
             flex: 1;
+            min-width: 200px;
         }
         
         .modal {
@@ -162,9 +218,13 @@
             border-radius: 10px;
             padding: 20px;
             width: 90%;
-            max-width: 600px;
+            max-width: 700px;
             max-height: 90vh;
             overflow-y: auto;
+        }
+        
+        .modal-content.dark-mode {
+            background: #2d2d2d;
         }
         
         .modal-header {
@@ -186,13 +246,22 @@
         
         .search-box {
             margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
         }
         
         .search-box input {
-            width: 100%;
+            flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .search-box input.dark-mode {
+            background: rgba(51, 51, 51, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
         
         .notification {
@@ -205,6 +274,7 @@
             font-weight: bold;
             z-index: 2000;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
         .notification.success {
@@ -214,6 +284,83 @@
         .notification.error {
             background: #d73a49;
         }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .pagination button.dark-mode {
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+        }
+        
+        .pagination button.active {
+            background: #0078d7;
+            color: white;
+            border-color: #0078d7;
+        }
+        
+        .pagination button:hover:not(.active) {
+            background: #f5f5f5;
+        }
+        
+        .pagination button:hover:not(.active).dark-mode {
+            background: #444;
+        }
+        
+        .items-per-page {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .items-per-page select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .manage-container {
+                padding: 10px;
+            }
+            
+            .manage-content {
+                padding: 15px;
+            }
+            
+            .data-table {
+                font-size: 14px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 5px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -221,30 +368,45 @@
         <header class="header">
             <div class="logo-container" id="logoContainer">
                 <img src="logo.svg" alt="仓鼠签Logo" class="website-logo">
-                <h1 id="siteTitle">仓鼠签 - 数据管理工具</h1>
+                <h1 id="siteTitle">网站数据管理工具</h1>
             </div>
             <div class="header-controls">
                 <button id="themeToggle" class="theme-toggle">🌙</button>
+                <a href="index.html" class="theme-toggle" style="text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🏠</a>
             </div>
         </header>
         
-        <div class="admin-container">
-            <div class="admin-header">
-                <h2>数据管理</h2>
-                <button id="addCategoryBtn" class="btn btn-primary">添加分类</button>
-                <button id="addSiteBtn" class="btn btn-primary">添加站点</button>
+        <div class="manage-container">
+            <div class="manage-header">
+                <h2>网站数据管理</h2>
+                <div>
+                    <button id="addCategoryBtn" class="btn btn-primary">添加分类</button>
+                    <button id="addSiteBtn" class="btn btn-primary">添加站点</button>
+                </div>
             </div>
             
-            <div class="admin-tabs">
-                <div class="admin-tab active" data-tab="categories">分类管理</div>
-                <div class="admin-tab" data-tab="sites">站点管理</div>
+            <div class="manage-tabs">
+                <div class="manage-tab active" data-tab="categories">分类管理</div>
+                <div class="manage-tab" data-tab="sites">站点管理</div>
             </div>
             
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索...">
+                <input type="text" id="searchInput" placeholder="输入关键词搜索...">
+                <button id="searchBtn" class="btn btn-primary">搜索</button>
             </div>
             
-            <div class="admin-content">
+            <div class="manage-content">
+                <div class="items-per-page">
+                    <span>每页显示:</span>
+                    <select id="itemsPerPage">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span>条记录</span>
+                </div>
+                
                 <div class="tab-content active" id="categories-tab">
                     <table class="data-table" id="categoriesTable">
                         <thead>
@@ -260,6 +422,9 @@
                             <!-- 数据将通过JavaScript动态加载 -->
                         </tbody>
                     </table>
+                    <div class="pagination" id="categoriesPagination">
+                        <!-- 分页按钮将通过JavaScript动态生成 -->
+                    </div>
                 </div>
                 
                 <div class="tab-content" id="sites-tab">
@@ -279,6 +444,9 @@
                             <!-- 数据将通过JavaScript动态加载 -->
                         </tbody>
                     </table>
+                    <div class="pagination" id="sitesPagination">
+                        <!-- 分页按钮将通过JavaScript动态生成 -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -294,7 +462,7 @@
             <form id="categoryForm">
                 <input type="hidden" id="categoryId">
                 <div class="form-group">
-                    <label for="categoryName">名称</label>
+                    <label for="categoryName">名称 *</label>
                     <input type="text" id="categoryName" required>
                 </div>
                 <div class="form-group">
@@ -306,7 +474,7 @@
                 </div>
                 <div class="form-group">
                     <label for="categorySort">排序</label>
-                    <input type="number" id="categorySort" value="0">
+                    <input type="number" id="categorySort" value="0" min="0">
                 </div>
                 <div class="form-group">
                     <button type="submit" class="btn btn-success">保存</button>
@@ -328,13 +496,13 @@
                 <div class="form-row">
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="siteTitle">标题</label>
+                            <label for="siteTitle">标题 *</label>
                             <input type="text" id="siteTitle" required>
                         </div>
                     </div>
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="siteUrl">URL</label>
+                            <label for="siteUrl">URL *</label>
                             <input type="url" id="siteUrl" required>
                         </div>
                     </div>
@@ -342,7 +510,7 @@
                 <div class="form-row">
                     <div class="form-col">
                         <div class="form-group">
-                            <label for="siteCategory">分类</label>
+                            <label for="siteCategory">分类 *</label>
                             <select id="siteCategory" required>
                                 <!-- 分类将通过JavaScript动态加载 -->
                             </select>
@@ -368,7 +536,7 @@
                     <div class="form-col">
                         <div class="form-group">
                             <label for="siteSort">排序</label>
-                            <input type="number" id="siteSort" value="0">
+                            <input type="number" id="siteSort" value="0" min="0">
                         </div>
                     </div>
                 </div>
@@ -389,6 +557,6 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="js/data.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/manage.js"></script>
 </body>
 </html>

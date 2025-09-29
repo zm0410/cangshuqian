@@ -131,6 +131,7 @@ id,title,url,description,category,icon,visible,sort_order
 3. **搜索功能** - 使用顶部搜索框进行模糊搜索或拼音搜索（支持中文拼音首字母）
 4. **主题切换** - 点击右上角 🌙/☀️ 按钮切换深色/明亮模式
 5. **导航返回** - 使用顶部 ← 返回按钮或面包屑导航返回上级分类
+6. **数据管理** - 点击右上角 ⚙️ 按钮进入数据管理工具，可以方便地对分类和站点进行增删改查
 
 ## 项目结构
 
@@ -145,11 +146,12 @@ id,title,url,description,category,icon,visible,sort_order
 ├── js/
 │   ├── data.js            # 数据管理类，负责加载和处理CSV数据
 │   ├── main.js            # 主要交互逻辑，包括页面渲染和事件处理
-│   └── tree.js            # 树形结构渲染器，负责左侧分类树的展示
+│   ├── tree.js            # 树形结构渲染器，负责左侧分类树的展示
+│   └── admin.js           # 数据管理工具脚本
 ├── favicon.ico            # 网站图标
 ├── index.html             # 主页面
+├── admin.html             # 数据管理工具页面
 ├── logo.svg               # 网站Logo（SVG格式）
-├── DEPLOYMENT-GUIDE.md    # 部署指南
 └── README.md              # 项目说明文件
 ```
 

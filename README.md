@@ -78,8 +78,6 @@ npx http-server
 
 ### 在线部署
 
-详细部署指南请参考 [DEPLOYMENT-GUIDE.md](DEPLOYMENT-GUIDE.md) 文件。
-
 #### GitHub Pages 部署
 1. Fork 本项目或创建新仓库
 2. 将所有文件推送到仓库
@@ -131,7 +129,7 @@ id,title,url,description,category,icon,visible,sort_order
 3. **搜索功能** - 使用顶部搜索框进行模糊搜索或拼音搜索（支持中文拼音首字母）
 4. **主题切换** - 点击右上角 🌙/☀️ 按钮切换深色/明亮模式
 5. **导航返回** - 使用顶部 ← 返回按钮或面包屑导航返回上级分类
-6. **数据管理** - 点击右上角 ⚙️ 按钮进入数据管理工具，可以方便地对分类和站点进行增删改查
+6. **数据管理** - 通过 [admin.html](admin.html) 可视化管理分类和站点数据
 
 ## 项目结构
 
@@ -141,18 +139,18 @@ id,title,url,description,category,icon,visible,sort_order
 │   └── style.css          # 主样式文件，包含所有CSS规则
 ├── data/
 │   ├── categories.csv     # 分类数据文件
-│   └── sites.csv          # 网站数据文件
-├── images/                # 图片资源目录
+│   └── sites.csv         # 网站数据文件
+├── images/               # 图片资源目录
 ├── js/
-│   ├── data.js            # 数据管理类，负责加载和处理CSV数据
-│   ├── main.js            # 主要交互逻辑，包括页面渲染和事件处理
-│   ├── tree.js            # 树形结构渲染器，负责左侧分类树的展示
-│   └── manage.js          # 数据管理工具脚本
-├── favicon.ico            # 网站图标
-├── index.html             # 主页面
-├── manage.html            # 数据管理工具页面
-├── logo.svg               # 网站Logo（SVG格式）
-└── README.md              # 项目说明文件
+│   ├── data.js           # 数据管理类，负责加载和处理CSV数据
+│   ├── main.js           # 主要交互逻辑，包括页面渲染和事件处理
+│   ├── tree.js           # 树形结构渲染器，负责左侧分类树的展示
+│   └── admin.js          # 数据管理界面逻辑
+├── favicon.ico           # 网站图标
+├── index.html            # 主页面
+├── admin.html            # 数据管理页面
+├── logo.svg              # 网站Logo（SVG格式）
+└── README.md             # 项目说明文件
 ```
 
 ## 自定义与扩展
@@ -161,6 +159,12 @@ id,title,url,description,category,icon,visible,sort_order
 - [data/categories.csv](data/categories.csv) - 更新分类结构
 - [data/sites.csv](data/sites.csv) - 更新网址数据
 
+通过访问 [admin.html](admin.html) 可以使用可视化界面管理分类和站点数据，支持：
+- 树形结构展示，便于查看分类和站点的层级关系
+- 展开/折叠功能，便于浏览大型数据集
+- 导入导出功能，支持CSV格式
+- 可视化编辑功能，可直接添加、编辑、删除分类和站点
+
 ### 样式自定义
 - [css/style.css](css/style.css) - 修改整体样式，包括颜色、布局、动画等
 
@@ -168,7 +172,6 @@ id,title,url,description,category,icon,visible,sort_order
 - [js/data.js](js/data.js) - 修改数据处理逻辑，如添加新的数据字段
 - [js/main.js](js/main.js) - 修改主交互逻辑，如添加新的页面功能
 - [js/tree.js](js/tree.js) - 修改树形结构逻辑，如调整分类展示方式
-- [js/manage.js](js/manage.js) - 修改数据管理工具逻辑
 
 ### 品牌定制
 - [logo.svg](logo.svg) - 替换为自定义Logo

@@ -258,16 +258,11 @@ class DataManager {
      */
     highlightKeyword(text, keyword) {
         if (!text || !keyword) return text;
-        const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
         const lowerText = text.toLowerCase();
         const lowerKeyword = keyword.toLowerCase();
         if (lowerText.includes(lowerKeyword)) {
             const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
             return text.replace(regex, '<mark>$1</mark>');
-        }
-        const pinyinText = pinyinPro.pinyin(text, { toneType: 'none', type: 'array' }).join('').toLowerCase();
-        if (pinyinText.includes(pinyinKeyword)) {
-            return text;
         }
         return text;
     }

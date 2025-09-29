@@ -170,18 +170,23 @@ function createItemRow(item, index) {
     const info = document.createElement('div');
     info.className = 'item-info';
     
-    const title = document.createElement('div');
+    const titleContainer = document.createElement('div');
+    titleContainer.className = 'item-title-container';
+    
+    const title = document.createElement('span');
     title.className = 'item-title';
     title.textContent = item.name;
     
-    info.appendChild(title);
+    titleContainer.appendChild(title);
     
     if (item.description) {
-        const description = document.createElement('div');
+        const description = document.createElement('span');
         description.className = 'item-description';
         description.textContent = item.description;
-        info.appendChild(description);
+        titleContainer.appendChild(description);
     }
+    
+    info.appendChild(titleContainer);
     
     if (item.url) {
         const url = document.createElement('div');
@@ -313,18 +318,23 @@ function createSearchResultRow(item, keyword, index) {
     const info = document.createElement('div');
     info.className = 'item-info';
     
-    const title = document.createElement('div');
+    const titleContainer = document.createElement('div');
+    titleContainer.className = 'item-title-container';
+    
+    const title = document.createElement('span');
     title.className = 'item-title';
     title.innerHTML = dataManager.highlightKeyword(item.name, keyword);
     
-    info.appendChild(title);
+    titleContainer.appendChild(title);
     
     if (item.description) {
-        const description = document.createElement('div');
+        const description = document.createElement('span');
         description.className = 'item-description';
         description.innerHTML = dataManager.highlightKeyword(item.description, keyword);
-        info.appendChild(description);
+        titleContainer.appendChild(description);
     }
+    
+    info.appendChild(titleContainer);
     
     if (item.url) {
         const url = document.createElement('div');

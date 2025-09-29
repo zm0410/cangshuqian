@@ -638,6 +638,13 @@ body.dark-mode {
     min-width: 0;
 }
 
+.item-title-container {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .item-title {
     font-weight: 600;
     font-size: 15px;
@@ -646,6 +653,7 @@ body.dark-mode {
 }
 
 .item-description {
+    font-weight: normal;
     font-size: 13px;
     color: #666;
     animation: fadeIn 0.3s ease-out 0.1s both;

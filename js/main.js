@@ -55,6 +55,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // 黑暗模式切换
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    
+    // 监听系统主题偏好变化
+    if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        mediaQuery.addEventListener('change', handleSystemThemeChange);
+    }
 
     // 返回按钮事件
     document.getElementById('backButton').addEventListener('click', goBack);
@@ -72,6 +78,19 @@ document.addEventListener('DOMContentLoaded', async function() {
     const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
+        updateThemeIcons();
+    } else if (savedTheme === 'light') {
+        // 明确选择浅色主题
+        document.body.classList.remove('dark-mode');
+        updateThemeIcons();
+    } else {
+        // 跟随系统主题
+        const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (systemPrefersDark) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
         updateThemeIcons();
     }
 });
@@ -164,7 +183,27 @@ function createItemRow(item, index) {
     } else if (item.type === 'folder') {
         icon.textContent = '📁';
     } else {
-        icon.textContent = '🔗';
+        // 对于链接类型，尝试使用网站的favicon.ico
+        if (item.url) {
+            try {
+                const urlObj = new URL(item.url);
+                const faviconUrl = urlObj.origin + '/favicon.ico';
+                const img = document.createElement('img');
+                img.src = faviconUrl;
+                img.alt = item.name;
+                img.className = 'item-favicon';
+                img.onerror = function() {
+                    // 如果favicon.ico也加载失败，显示默认emoji图标
+                    icon.textContent = '🔗';
+                };
+                icon.appendChild(img);
+            } catch (e) {
+                // URL无效时显示默认emoji图标
+                icon.textContent = '🔗';
+            }
+        } else {
+            icon.textContent = '🔗';
+        }
     }
     
     const info = document.createElement('div');
@@ -404,6 +443,30 @@ function toggleTheme() {
     
     // 应用黑暗模式类
     updateDarkModeClasses();
+    
+    // 添加点击动画效果
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.classList.add('theme-toggle-clicked');
+    setTimeout(() => {
+        themeToggle.classList.remove('theme-toggle-clicked');
+    }, 300);
+}
+
+/**
+ * 处理系统主题偏好变化
+ */
+function handleSystemThemeChange(e) {
+    // 只有在用户没有明确选择主题时才跟随系统变化
+    const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
+    if (!savedTheme) {
+        if (e.matches) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        updateThemeIcons();
+        updateDarkModeClasses();
+    }
 }
 
 /**
@@ -416,6 +479,12 @@ function updateThemeIcons() {
     } else {
         themeToggle.textContent = '🌙';
     }
+    
+    // 添加过渡效果
+    themeToggle.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        themeToggle.style.transform = 'scale(1)';
+    }, 300);
 }
 
 /**

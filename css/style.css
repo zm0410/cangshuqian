@@ -228,6 +228,10 @@ body.dark-mode {
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
+    user-select: none;
+    outline: none;
+    transform: scale(1);
+    transition: all 0.3s ease;
 }
 
 .theme-toggle::before {
@@ -256,11 +260,29 @@ body.dark-mode {
     transform: rotate(24deg) scale(0.95);
 }
 
+.theme-toggle-clicked {
+    animation: themeToggleClick 0.3s ease;
+}
+
+@keyframes themeToggleClick {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(0.9) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
 .theme-toggle.dark-mode {
     background: rgba(40, 40, 60, 0.9);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #eee;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle:focus {
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.5);
+}
+
+.theme-toggle.dark-mode:focus {
+    box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.7);
 }
 
 .theme-toggle.dark-mode:hover {

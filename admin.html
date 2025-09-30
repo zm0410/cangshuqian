@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据管理 - 仓鼠签</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #eee;
+        }
+
+        .admin-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 0;
+        }
+
+        .admin-header {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #333;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            animation: fadeInDown 0.5s ease-out;
+        }
+
+        .admin-header.dark-mode {
+            background: rgba(30, 30, 46, 0.75);
+            color: #eee;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        .admin-sidebar {
+            width: 350px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            padding: 8px 0;
+            transition: background-color 0.3s, border-color 0.3s;
+            margin-right: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-sidebar.dark-mode {
+            background: rgba(45, 45, 45, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-sidebar-header {
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-sidebar-header.dark-mode {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-sidebar-buttons {
+            display: flex;
+            gap: 5px;
+            padding: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            color: #0078d7;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: rgba(240, 240, 240, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            background: rgba(220, 220, 220, 0.9);
+            transform: translateY(0);
+        }
+
+        .btn.dark-mode {
+            background: rgba(0, 90, 158, 0.8);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn.dark-mode:hover {
+            background: rgba(0, 70, 120, 0.9);
+        }
+
+        .btn.dark-mode:active {
+            background: rgba(0, 50, 100, 0.9);
+        }
+
+        .btn-primary {
+            background: rgba(0, 120, 215, 0.8);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: rgba(0, 100, 180, 0.9);
+        }
+
+        .btn-primary.dark-mode {
+            background: rgba(0, 100, 180, 0.8);
+        }
+
+        .btn-primary.dark-mode:hover {
+            background: rgba(0, 80, 150, 0.9);
+        }
+
+        .admin-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .admin-content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 8px;
+        }
+
+        .admin-content-header.dark-mode {
+            background: rgba(61, 61, 61, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-content-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .admin-items-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: background-color 0.3s;
+            border-radius: 10px;
+        }
+
+        .admin-items-container.dark-mode {
+            background: rgba(30, 30, 30, 0.6);
+        }
+
+        .admin-item-row {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            animation: slideInUp 0.4s ease-out;
+            min-height: 56px;
+        }
+
+        .admin-item-row:hover {
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .admin-item-row:hover.dark-mode {
+            background: rgba(45, 45, 45, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .admin-item-row.folder {
+            border-left: 3px solid #ffd700;
+        }
+
+        .admin-item-row.link {
+            border-left: 3px solid #0078d7;
+        }
+
+        .admin-item-row.dark-mode {
+            background: rgba(45, 45, 45, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-item-row.drag-over {
+            background: rgba(0, 120, 215, 0.2);
+            border: 2px dashed #0078d7;
+        }
+
+        .admin-item-row.drag-over.dark-mode {
+            background: rgba(0, 120, 215, 0.3);
+        }
+
+        .admin-item-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            animation: bounceIn 0.5s ease-out;
+            overflow: hidden;
+        }
+        .admin-item-icon img {
+            max-width: 24px;
+            max-height: 24px;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        .admin-item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .admin-item-title {
+            font-weight: 600;
+            font-size: 15px;
+            animation: fadeIn 0.3s ease-out;
+            word-break: break-word;
+        }
+
+        .admin-item-description {
+            font-weight: normal;
+            font-size: 13px;
+            color: #666;
+            animation: fadeIn 0.3s ease-out 0.1s both;
+            word-break: break-word;
+        }
+
+        .admin-item-description.dark-mode {
+            color: #aaa;
+        }
+
+        .admin-item-url {
+            font-size: 12px;
+            color: #0078d7;
+            animation: fadeIn 0.3s ease-out 0.2s both;
+            word-break: break-all;
+        }
+
+        .admin-item-url.dark-mode {
+            color: #4da6ff;
+        }
+
+        .admin-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .admin-item-action {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .admin-item-action:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        .admin-item-action.dark-mode {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-item-action.dark-mode:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .admin-tree {
+            flex: 1;
+            padding: 0 8px;
+            overflow-y: auto;
+        }
+
+        .admin-tree-node {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .admin-tree-node ul {
+            margin-left: 20px;
+            display: none;
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.3s ease-out;
+        }
+
+        .admin-tree-node.expanded > ul {
+            display: block;
+        }
+
+        .admin-tree-item {
+            padding: 6px 8px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 1px 0;
+            transition: all 0.2s ease;
+            animation: fadeIn 0.3s ease-out;
+            font-size: 14px;
+            min-height: 36px;
+        }
+
+        .admin-tree-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .admin-tree-item:hover.dark-mode {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-tree-item.selected {
+            background-color: rgba(0, 120, 215, 0.2);
+            color: #0078d7;
+            animation: pulse 1s infinite;
+        }
+
+        .admin-tree-item.selected.dark-mode {
+            background-color: rgba(0, 120, 215, 0.3);
+            color: #4da6ff;
+        }
+
+        .admin-tree-item.drag-over {
+            background-color: rgba(0, 120, 215, 0.2);
+            border: 1px dashed #0078d7;
+        }
+
+        .admin-tree-item.drag-over.dark-mode {
+            background-color: rgba(0, 120, 215, 0.3);
+        }
+
+        .admin-tree-item .icon {
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .admin-tree-item .toggle {
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .admin-tree-item .toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .folder-icon::before {
+            content: "📁";
+        }
+
+        .folder-icon[data-expanded="true"]::before {
+            content: "📂";
+        }
+
+        .link-icon::before {
+            content: "🔗";
+        }
+
+        .drag-handle {
+            cursor: move;
+            color: #999;
+        }
+
+        .drag-handle:hover {
+            color: #333;
+        }
+
+        .drag-handle.dark-mode:hover {
+            color: #fff;
+        }
+
+        .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 兼容性增强 */
+    min-height: 100vh;
+    min-width: 100vw;
+        }
+
+        .modal-content {
+        background-color: #fefefe;
+    margin: 0;
+    /* 彻底去除外边距，保证居中 */
+    align-self: center;
+    justify-self: center;
+        padding: 20px;
+        border: 1px solid #888;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        animation: slideInDown 0.3s ease-out;
+        }
+
+        .modal-content.dark-mode {
+            background-color: #2d2d2d;
+            border: 1px solid #555;
+            color: #eee;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header.dark-mode {
+            border-bottom: 1px solid #555;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+        }
+
+        .close.dark-mode:hover,
+        .close.dark-mode:focus {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group input.dark-mode,
+        .form-group textarea.dark-mode,
+        .form-group select.dark-mode {
+            background: #333;
+            border: 1px solid #555;
+            color: #eee;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .import-export-section {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .import-export-section.dark-mode {
+            background: rgba(61, 61, 61, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .import-export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #0078d7;
+            background: rgba(0, 120, 215, 0.1);
+        }
+
+        .drop-zone.dark-mode {
+            border: 2px dashed #555;
+        }
+
+        .drop-zone.dark-mode.drag-over {
+            border-color: #0078d7;
+            background: rgba(0, 120, 215, 0.2);
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInRight 0.5s ease-out 0.2s both;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            outline: none;
+            transform: scale(1);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(248,239,230,0.8) 0%, rgba(248,239,230,0) 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: rotate(12deg) scale(1.05);
+        }
+
+        .theme-toggle:hover::before {
+            opacity: 1;
+        }
+
+        .theme-toggle:active {
+            transform: rotate(24deg) scale(0.95);
+        }
+        
+        .theme-toggle-clicked {
+            animation: themeToggleClick 0.3s ease;
+        }
+        
+        @keyframes themeToggleClick {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(0.9) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .theme-toggle.dark-mode {
+            background: rgba(40, 40, 60, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #eee;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle.dark-mode:hover {
+            background: rgba(50, 50, 70, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .theme-toggle.dark-mode::before {
+            background: radial-gradient(circle, rgba(200,200,255,0.2) 0%, rgba(200,200,255,0) 70%);
+        }
+        
+        .theme-toggle:focus {
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.5);
+        }
+        
+        .theme-toggle.dark-mode:focus {
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.7);
+        }
+
+        /* 动画关键帧 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            from, 20%, 40%, 60%, 80%, to {
+                animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+            }
+            0% {
+                opacity: 0;
+                transform: scale3d(0.3, 0.3, 0.3);
+            }
+            20% {
+                transform: scale3d(1.1, 1.1, 1.1);
+            }
+            40% {
+                transform: scale3d(0.9, 0.9, 0.9);
+            }
+            60% {
+                opacity: 1;
+                transform: scale3d(1.03, 1.03, 1.03);
+            }
+            80% {
+                transform: scale3d(0.97, 0.97, 0.97);
+            }
+            to {
+                opacity: 1;
+                transform: scale3d(1, 1, 1);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 120, 215, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(0, 120, 215, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 120, 215, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-main {
+                flex-direction: column;
+            }
+
+            .admin-sidebar {
+                width: 100%;
+                height: 40%;
+                margin-right: 0;
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>数据管理</h1>
+            <div class="header-controls">
+                <button id="themeToggle" class="theme-toggle">🌙</button>
+            </div>
+        </header>
+
+        <div class="admin-main">
+            <div class="admin-sidebar">
+                <div class="admin-sidebar-header">
+                    <span>目录结构</span>
+                    <div class="admin-sidebar-buttons">
+                        <button id="addCategoryBtn" class="btn btn-primary">添加分类</button>
+                    </div>
+                </div>
+                <div class="admin-sidebar-buttons">
+                    <button id="expandAllBtn" class="btn">全部展开</button>
+                    <button id="collapseAllBtn" class="btn">全部收起</button>
+                </div>
+                <div class="admin-tree" id="adminTree">
+                    <!-- 树形结构将通过JavaScript动态生成 -->
+                </div>
+            </div>
+
+            <div class="admin-content">
+                <div class="admin-content-header">
+                    <div class="admin-content-title" id="contentTitle">所有项目</div>
+                    <div>
+                        <button id="addItemBtn" class="btn btn-primary">添加项目</button>
+                    </div>
+                </div>
+
+                <div class="import-export-section">
+                    <h3>导入/导出数据</h3>
+                    <div class="import-export-buttons">
+                        <button id="exportCategoriesBtn" class="btn">导出分类</button>
+                        <button id="exportSitesBtn" class="btn">导出站点</button>
+                        <button id="importCategoriesBtn" class="btn">导入分类</button>
+                        <button id="importSitesBtn" class="btn">导入站点</button>
+                    </div>
+                    <div class="drop-zone" id="dropZone">
+                        <p>拖拽 CSV 文件到此处进行导入</p>
+                        <p>支持拖拽分类和站点文件</p>
+                    </div>
+                </div>
+
+                <div class="admin-items-container" id="adminItemsContainer">
+                    <!-- 内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑分类模态框 -->
+    <div id="categoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="categoryModalTitle">编辑分类</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="categoryForm">
+                <div class="form-group">
+                    <label for="categoryId">ID:</label>
+                    <input type="text" id="categoryId" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoryName">名称:</label>
+                    <input type="text" id="categoryName" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoryParent">父级分类:</label>
+                    <select id="categoryParent">
+                        <option value="">无</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="categorySortOrder">排序:</label>
+                    <input type="number" id="categorySortOrder" min="0" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelCategoryBtn" class="btn">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑站点模态框 -->
+    <div id="siteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="siteModalTitle">编辑站点</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="siteForm">
+                <div class="form-group">
+                    <label for="siteId">ID:</label>
+                    <input type="text" id="siteId" required>
+                </div>
+                <div class="form-group">
+                    <label for="siteTitle">标题:</label>
+                    <input type="text" id="siteTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="siteUrl">网址:</label>
+                    <input type="url" id="siteUrl" required>
+                </div>
+                <div class="form-group">
+                    <label for="siteDescription">描述:</label>
+                    <textarea id="siteDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="siteCategory">分类:</label>
+                    <select id="siteCategory">
+                        <option value="">请选择分类</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="siteIcon">图标:</label>
+                    <input type="text" id="siteIcon">
+                </div>
+                <div class="form-group">
+                    <label for="siteVisible">可见性:</label>
+                    <select id="siteVisible">
+                        <option value="1">可见</option>
+                        <option value="0">隐藏</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="siteSortOrder">排序:</label>
+                    <input type="number" id="siteSortOrder" min="0" value="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="cancelSiteBtn" class="btn">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * 管理页面主逻辑
+         */
+
+        class DataManager {
+            constructor() {
+                /** @type {Array<Object>} 所有数据项列表 */
+                this.data = [];
+                
+                /** @type {Object} 树形结构数据 */
+                this.treeData = {};
+                
+                /** @type {Object} 节点映射表 */
+                this.nodeMap = {};
+                
+                /** @type {Array<Object>} 分类数据 */
+                this.categories = [
+                    {id: 'cat1', name: '分类1', parent: '', sort_order: 0},
+                    {id: 'cat2', name: '分类2', parent: '', sort_order: 1},
+                    {id: 'cat1_1', name: '子分类1.1', parent: 'cat1', sort_order: 0},
+                    {id: 'cat1_1_1', name: '子分类1.1.1', parent: 'cat1_1', sort_order: 0},
+                    {id: 'cat1_2', name: '子分类1.2', parent: 'cat1', sort_order: 1},
+                    {id: 'cat2_1', name: '子分类2.1', parent: 'cat2', sort_order: 0}
+                ];
+                
+                /** @type {Array<Object>} 网站链接数据 */
+                this.sites = [
+                    {id: 'site1', title: 'Google', url: 'https://www.google.com', category: 'cat1', icon: '', description: '搜索引擎', visible: '1', sort_order: 0},
+                    {id: 'site2', title: 'GitHub', url: 'https://github.com', category: 'cat1_1', icon: '', description: '代码托管平台', visible: '1', sort_order: 0}
+                ];
+            }
+
+            /**
+             * 构建数据
+             */
+            loadData() {
+                // 优先从 localStorage 恢复
+                try {
+                    const cached = localStorage.getItem('hamster-bookmarks-data');
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Array.isArray(parsed.categories) && Array.isArray(parsed.sites)) {
+                            this.categories = parsed.categories;
+                            this.sites = parsed.sites;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('本地缓存解析失败:', e);
+                }
+                try {
+                    this.data = this.buildDataFromCategoriesAndSites();
+                    this.buildTree();
+                    return this.data;
+                } catch (error) {
+                    console.error('数据加载失败:', error);
+                    throw error;
+                }
+            }
+
+            saveToLocal() {
+                try {
+                    localStorage.setItem('hamster-bookmarks-data', JSON.stringify({
+                        categories: this.categories,
+                        sites: this.sites
+                    }));
+                } catch (e) {
+                    alert('本地保存失败：' + e.message);
+                }
+            }
+
+            /**
+             * 根据 categories 和 sites 构建统一数据结构
+             * @returns {Array<Object>} 构建后的数据数组
+             */
+            buildDataFromCategoriesAndSites() {
+                // 只遍历一次categories和sites，避免多次Object.values和map
+                const data = [];
+                for (let i = 0; i < this.categories.length; i++) {
+                    const cat = this.categories[i];
+                    const parentId = cat.parent_id !== undefined ? cat.parent_id : (cat.parent !== undefined ? cat.parent : '');
+                    data.push({
+                        id: cat.id,
+                        parent_id: parentId,
+                        name: cat.name,
+                        type: 'folder',
+                        url: '',
+                        icon: '',
+                        description: '',
+                        sort_order: cat.sort_order ? parseInt(cat.sort_order) : 9999
+                    });
+                }
+                for (let i = 0; i < this.sites.length; i++) {
+                    const site = this.sites[i];
+                    let icon = '';
+                    if (site.icon) {
+                        icon = site.icon;
+                    } else if (site.url) {
+                        try {
+                            const urlObj = new URL(site.url);
+                            icon = urlObj.origin + '/favicon.ico';
+                        } catch (e) {}
+                    }
+                    data.push({
+                        id: site.id,
+                        parent_id: site.category,
+                        name: site.title,
+                        type: 'link',
+                        url: site.url,
+                        icon: icon,
+                        description: site.description,
+                        sort_order: site.sort_order ? parseInt(site.sort_order) : 9999
+                    });
+                }
+                return data;
+            }
+
+            /**
+             * 构建树形结构
+             */
+            buildTree() {
+                // 优化：单次遍历构建nodeMap和children
+                this.nodeMap = {};
+                for (let i = 0; i < this.data.length; i++) {
+                    const item = this.data[i];
+                    this.nodeMap[item.id] = { ...item, children: [] };
+                }
+                // 只遍历一次，建立父子关系
+                for (let i = 0; i < this.data.length; i++) {
+                    const item = this.data[i];
+                    if (item.parent_id && this.nodeMap[item.parent_id]) {
+                        this.nodeMap[item.parent_id].children.push(this.nodeMap[item.id]);
+                    }
+                }
+                // 排序
+                for (const node of Object.values(this.nodeMap)) {
+                    if (node.children && node.children.length > 0) {
+                        node.children.sort((a, b) => {
+                            if (a.type === 'folder' && b.type === 'link') return -1;
+                            if (a.type === 'link' && b.type === 'folder') return 1;
+                            return a.sort_order - b.sort_order;
+                        });
+                    }
+                }
+                this.treeData = {
+                    id: 'root',
+                    name: '所有书签',
+                    type: 'folder',
+                    children: []
+                };
+                for (let i = 0; i < this.data.length; i++) {
+                    const item = this.data[i];
+                    if ((item.parent_id === undefined || item.parent_id === null || item.parent_id === '' || item.parent_id === '0') && item.type === 'folder') {
+                        this.treeData.children.push(this.nodeMap[item.id]);
+                    }
+                }
+                this.treeData.children.sort((a, b) => a.sort_order - b.sort_order);
+            }
+
+            /**
+             * 获取指定节点的子节点
+             * @param {string} parentId - 父节点ID
+             * @returns {Array<Object>} 子节点数组
+             */
+            getChildren(parentId) {
+                if (!parentId) {
+                    return this.treeData.children || [];
+                }
+                const node = this.nodeMap[parentId];
+                return node ? (node.children || []) : [];
+            }
+
+            /**
+             * 根据ID获取节点
+             * @param {string} id - 节点ID
+             * @returns {Object|null} 节点对象或null
+             */
+            getNodeById(id) {
+                if (id === 'root') {
+                    return this.treeData;
+                }
+                return this.nodeMap[id] || null;
+            }
+        }
+
+        class AdminManager {
+            /**
+             * 处理树节点拖拽移动（支持分类和站点，支持拖到任意节点前后/同级排序/根节点）
+             * @param {string} targetId 目标节点ID
+             * @param {DragEvent} e 拖拽事件
+             */
+            handleTreeDrop(targetId, e) {
+                e.preventDefault();
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (!draggedId || draggedId === targetId) return;
+                // 拖动源
+                let draggedCat = this.dataManager.categories.find(cat => cat.id === draggedId);
+                let draggedSite = this.dataManager.sites.find(site => site.id === draggedId);
+                // 目标节点
+                let targetCat = this.dataManager.categories.find(cat => cat.id === targetId);
+                let targetSite = this.dataManager.sites.find(site => site.id === targetId);
+                // 拖动到根节点
+                let newParent = '';
+                let siblings = [];
+                if (targetId === 'root') {
+                    newParent = '';
+                    siblings = this.dataManager.categories.filter(cat => !cat.parent);
+                } else if (targetCat) {
+                    newParent = targetCat.parent || '';
+                    siblings = this.dataManager.categories.filter(cat => (cat.parent || '') === newParent);
+                } else if (targetSite) {
+                    newParent = targetSite.category || '';
+                    siblings = this.dataManager.sites.filter(site => (site.category || '') === newParent);
+                }
+                // 排序：将拖动项插入到目标节点前
+                if (draggedCat) {
+                    // 不能拖到自己或自己的子孙节点下
+                    let parent = targetId;
+                    while (parent) {
+                        if (parent === draggedId) return;
+                        const p = this.dataManager.categories.find(cat => cat.id === parent);
+                        parent = p ? p.parent : null;
+                    }
+                    draggedCat.parent = newParent;
+                    // 重新排序siblings
+                    siblings = siblings.filter(cat => cat.id !== draggedId);
+                    const targetIdx = siblings.findIndex(cat => cat.id === targetId);
+                    siblings.splice(targetIdx, 0, draggedCat);
+                    siblings.forEach((cat, idx) => cat.sort_order = idx);
+                } else if (draggedSite) {
+                    draggedSite.category = newParent;
+                    siblings = siblings.filter(site => site.id !== draggedId);
+                    const targetIdx = siblings.findIndex(site => site.id === targetId);
+                    siblings.splice(targetIdx, 0, draggedSite);
+                    siblings.forEach((site, idx) => site.sort_order = idx);
+                }
+                this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                this.dataManager.buildTree();
+                this.renderTree();
+                this.renderContent(this.selectedNodeId);
+                this.dataManager.saveToLocal();
+            }
+            /**
+             * 绑定模态框关闭按钮事件
+             */
+            bindModalCloseEvents() {
+                // 分类模态框
+                document.querySelector('#categoryModal .close').onclick = () => {
+                    document.getElementById('categoryModal').style.display = 'none';
+                };
+                // 站点模态框
+                document.querySelector('#siteModal .close').onclick = () => {
+                    document.getElementById('siteModal').style.display = 'none';
+                };
+            }
+            /**
+             * 递归创建树节点
+             * @param {Object} node - 当前节点
+             * @param {boolean} isRoot - 是否为根节点
+             * @param {number} depth - 层级
+             * @returns {HTMLElement}
+             */
+            createTreeNode(node, isRoot = false, depth = 0) {
+                const li = document.createElement('li');
+                li.className = 'admin-tree-node';
+                li.style.animationDelay = `${depth * 0.1}s`;
+                const hasChildren = node.children && node.children.length > 0;
+                const div = document.createElement('div');
+                div.className = 'admin-tree-item';
+                div.dataset.id = node.id;
+                // 拖拽支持
+                // 所有节点都可作为拖拽源
+                if (node.id !== 'root') {
+                    div.setAttribute('draggable', true);
+                    div.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', node.id);
+                        this.draggedItem = node;
+                    });
+                }
+                // 所有节点都可作为拖拽目标（含根节点）
+                div.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    div.classList.add('drag-over');
+                });
+                div.addEventListener('dragleave', () => {
+                    div.classList.remove('drag-over');
+                });
+                div.addEventListener('drop', (e) => {
+                    div.classList.remove('drag-over');
+                    this.handleTreeDrop(node.id, e);
+                });
+                // 切换按钮
+                const toggle = document.createElement('span');
+                toggle.className = 'toggle';
+                if (hasChildren) {
+                    toggle.textContent = '▶';
+                }
+                div.appendChild(toggle);
+                // 图标
+                const icon = document.createElement('span');
+                icon.className = 'icon';
+                if (node.type === 'folder') {
+                    icon.classList.add('folder-icon');
+                } else {
+                    icon.classList.add('link-icon');
+                }
+                div.appendChild(icon);
+                // 名称
+                const name = document.createElement('span');
+                name.className = 'name';
+                name.textContent = node.name;
+                div.appendChild(name);
+                // 拖拽手柄（仅文件夹）
+                if (node.type === 'folder') {
+                    const dragHandle = document.createElement('span');
+                    dragHandle.className = 'drag-handle';
+                    dragHandle.innerHTML = '⋮⋮';
+                    dragHandle.setAttribute('draggable', true);
+                    dragHandle.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', node.id);
+                        this.draggedItem = node;
+                    });
+                    div.appendChild(dragHandle);
+                }
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (e.target === toggle) {
+                        li.classList.toggle('expanded');
+                        toggle.textContent = li.classList.contains('expanded') ? '▼' : '▶';
+                        if (node.type === 'folder') {
+                            const folderIcon = div.querySelector('.folder-icon');
+                            if (folderIcon) {
+                                folderIcon.setAttribute('data-expanded', li.classList.contains('expanded'));
+                            }
+                        }
+                        return;
+                    }
+                    this.selectNode(node.id);
+                });
+                li.appendChild(div);
+                // 递归子节点
+                if (hasChildren) {
+                    const ul = document.createElement('ul');
+                    node.children.forEach((child, index) => {
+                        const childNode = this.createTreeNode(child, false, depth + 1);
+                        childNode.style.animationDelay = `${(depth + 1) * 0.1 + index * 0.05}s`;
+                        ul.appendChild(childNode);
+                    });
+                    li.appendChild(ul);
+                }
+                return li;
+            }
+            /**
+             * 渲染左侧树结构
+             */
+            renderTree() {
+                const treeContainer = document.getElementById('adminTree');
+                treeContainer.innerHTML = '';
+                const treeRoot = this.dataManager.treeData;
+                const treeElement = this.createTreeNode(treeRoot, true);
+                treeElement.style.animationDelay = '0.1s';
+                treeContainer.appendChild(treeElement);
+                // 展开根节点
+                treeElement.classList.add('expanded');
+                // 选中根节点
+                const rootItem = treeElement.querySelector('.admin-tree-item');
+                if (rootItem) {
+                    rootItem.classList.add('selected');
+                }
+            }
+            /**
+             * 初始化页面事件和初始渲染
+             */
+            init() {
+                // 强制隐藏所有弹窗，防止初始显示
+                document.getElementById('categoryModal').style.display = 'none';
+                this.dataManager.saveToLocal();
+                document.getElementById('siteModal').style.display = 'none';
+                this.dataManager.saveToLocal();
+                // 渲染初始树和内容
+                this.dataManager.loadData();
+                this.renderTree();
+                this.renderContent(this.selectedNodeId);
+
+                // 事件绑定
+                document.getElementById('addCategoryBtn').onclick = () => this.showCategoryModal();
+                document.getElementById('addItemBtn').onclick = () => this.showSiteModal();
+                document.getElementById('expandAllBtn').onclick = () => this.expandAll();
+                document.getElementById('collapseAllBtn').onclick = () => this.collapseAll();
+                document.getElementById('exportCategoriesBtn').onclick = () => this.exportCategories();
+                document.getElementById('exportSitesBtn').onclick = () => this.exportSites();
+                document.getElementById('importCategoriesBtn').onclick = () => this.importCategories();
+                document.getElementById('importSitesBtn').onclick = () => this.importSites();
+                document.getElementById('cancelCategoryBtn').onclick = () => document.getElementById('categoryModal').style.display = 'none';
+                document.getElementById('cancelSiteBtn').onclick = () => document.getElementById('siteModal').style.display = 'none';
+                
+                // 主题切换
+                document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+                
+                // 监听系统主题偏好变化
+                if (window.matchMedia) {
+                    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                    mediaQuery.addEventListener('change', (e) => this.handleSystemThemeChange(e));
+                }
+
+                // 表单提交事件
+                document.getElementById('categoryForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.saveCategory();
+                };
+                
+                document.getElementById('siteForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.saveSite();
+                };
+                
+                this.bindModalCloseEvents();
+
+                // 点击模态框外部关闭
+                window.addEventListener('click', (e) => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        if (e.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                });
+
+                // 拖拽导入
+                const dropZone = document.getElementById('dropZone');
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                });
+                dropZone.addEventListener('dragleave', () => {
+                    dropZone.classList.remove('drag-over');
+                });
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const file = files[0];
+                        if (file.name.endsWith('categories.csv')) {
+                            this.importCategoriesFromFile(file);
+                        } else if (file.name.endsWith('sites.csv')) {
+                            this.importSitesFromFile(file);
+                        } else {
+                            alert('请拖入 categories.csv 或 sites.csv 文件');
+                        }
+                    }
+                });
+                
+                // 检查本地存储中的主题设置
+                this.applySavedTheme();
+            }
+
+            /**
+             * 切换主题
+             */
+            toggleTheme() {
+                document.body.classList.toggle('dark-mode');
+                
+                // 更新图标
+                this.updateThemeIcons();
+                
+                // 保存主题设置到本地存储
+                if (document.body.classList.contains('dark-mode')) {
+                    localStorage.setItem('hamster-bookmarks-theme', 'dark');
+                } else {
+                    localStorage.setItem('hamster-bookmarks-theme', 'light');
+                }
+                
+                // 添加点击动画效果
+                const themeToggle = document.getElementById('themeToggle');
+                themeToggle.classList.add('theme-toggle-clicked');
+                setTimeout(() => {
+                    themeToggle.classList.remove('theme-toggle-clicked');
+                }, 300);
+            }
+            
+            /**
+             * 处理系统主题偏好变化
+             */
+            handleSystemThemeChange(e) {
+                // 只有在用户没有明确选择主题时才跟随系统变化
+                const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
+                if (!savedTheme) {
+                    if (e.matches) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                    this.updateThemeIcons();
+                }
+            }
+            
+            /**
+             * 应用保存的主题设置
+             */
+            applySavedTheme() {
+                const savedTheme = localStorage.getItem('hamster-bookmarks-theme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    this.updateThemeIcons();
+                } else if (savedTheme === 'light') {
+                    // 明确选择浅色主题
+                    document.body.classList.remove('dark-mode');
+                    this.updateThemeIcons();
+                } else {
+                    // 跟随系统主题
+                    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (systemPrefersDark) {
+                        document.body.classList.add('dark-mode');
+                    } else {
+                        document.body.classList.remove('dark-mode');
+                    }
+                    this.updateThemeIcons();
+                }
+            }
+            
+            /**
+             * 更新主题图标
+             */
+            updateThemeIcons() {
+                const themeToggle = document.getElementById('themeToggle');
+                if (document.body.classList.contains('dark-mode')) {
+                    themeToggle.textContent = '☀️';
+                } else {
+                    themeToggle.textContent = '🌙';
+                }
+                
+                // 添加过渡效果
+                themeToggle.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    themeToggle.style.transform = 'scale(1)';
+                }, 300);
+            }
+
+            // 支持拖拽文件导入
+            importCategoriesFromFile(file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const csv = evt.target.result;
+                    const rows = csv.split(/\r?\n/).filter(Boolean);
+                    if (rows.length < 2) {
+                        alert('CSV内容无效');
+                        return;
+                    }
+                    const header = rows[0].split(',');
+                    const idIdx = header.indexOf('id');
+                    const nameIdx = header.indexOf('name');
+                    const parentIdx = header.indexOf('parent');
+                    const sortIdx = header.indexOf('sort_order');
+                    if (idIdx === -1 || nameIdx === -1 || parentIdx === -1) {
+                        alert('CSV缺少必要字段');
+                        return;
+                    }
+                    const newCategories = rows.slice(1).map(row => {
+                        const cols = row.split(',');
+                        return {
+                            id: cols[idIdx],
+                            name: cols[nameIdx],
+                            parent: cols[parentIdx],
+                            sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                        };
+                    });
+                    this.dataManager.categories = newCategories;
+                    this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                    this.dataManager.buildTree();
+                    this.renderTree();
+                    this.renderContent(this.selectedNodeId);
+                    alert('分类导入成功，已覆盖原有分类数据！');
+                };
+                reader.readAsText(file, 'utf-8');
+            }
+
+            importSitesFromFile(file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    const csv = evt.target.result;
+                    const rows = csv.split(/\r?\n/).filter(Boolean);
+                    if (rows.length < 2) {
+                        alert('CSV内容无效');
+                        return;
+                    }
+                    const header = rows[0].split(',');
+                    const idIdx = header.indexOf('id');
+                    const titleIdx = header.indexOf('title');
+                    const urlIdx = header.indexOf('url');
+                    const descIdx = header.indexOf('description');
+                    const catIdx = header.indexOf('category');
+                    const iconIdx = header.indexOf('icon');
+                    const visibleIdx = header.indexOf('visible');
+                    const sortIdx = header.indexOf('sort_order');
+                    if (idIdx === -1 || titleIdx === -1 || urlIdx === -1 || catIdx === -1) {
+                        alert('CSV缺少必要字段');
+                        return;
+                    }
+                    const newSites = rows.slice(1).map(row => {
+                        const cols = row.split(',');
+                        return {
+                            id: cols[idIdx],
+                            title: cols[titleIdx],
+                            url: cols[urlIdx],
+                            description: descIdx !== -1 ? cols[descIdx] : '',
+                            category: cols[catIdx],
+                            icon: iconIdx !== -1 ? cols[iconIdx] : '',
+                            visible: visibleIdx !== -1 ? cols[visibleIdx] : '1',
+                            sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                        };
+                    });
+                    this.dataManager.sites = newSites;
+                    this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                    this.dataManager.buildTree();
+                    this.renderTree();
+                    this.renderContent(this.selectedNodeId);
+                    alert('站点导入成功，已覆盖原有站点数据！');
+                };
+                reader.readAsText(file, 'utf-8');
+            }
+            constructor() {
+                this.dataManager = new DataManager();
+                this.selectedNodeId = 'root';
+                this.draggedItem = null;
+                this.isDarkMode = localStorage.getItem('hamster-bookmarks-theme') === 'dark';
+            }
+
+            importCategories() {
+                // 严格按新字段定义解析categories.csv
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const csv = evt.target.result;
+                        const rows = csv.split(/\r?\n/).filter(Boolean);
+                        if (rows.length < 2) {
+                            alert('CSV内容无效');
+                            return;
+                        }
+                        const header = rows[0].split(',');
+                        const idIdx = header.indexOf('id');
+                        const nameIdx = header.indexOf('name');
+                        const parentIdx = header.indexOf('parent');
+                        const sortIdx = header.indexOf('sort_order');
+                        if (idIdx === -1 || nameIdx === -1 || parentIdx === -1) {
+                            alert('CSV缺少必要字段');
+                            return;
+                        }
+                        const newCategories = rows.slice(1).map(row => {
+                            const cols = row.split(',');
+                            return {
+                                id: cols[idIdx],
+                                name: cols[nameIdx],
+                                parent: cols[parentIdx],
+                                sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                            };
+                        });
+                        this.dataManager.categories = newCategories;
+                        this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                        this.dataManager.buildTree();
+                        this.renderTree();
+                        this.renderContent(this.selectedNodeId);
+                        alert('分类导入成功，已覆盖原有分类数据！');
+                    };
+                    reader.readAsText(file, 'utf-8');
+                };
+                input.click();
+            }
+
+            importSites() {
+                // 严格按新字段定义解析sites.csv
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const csv = evt.target.result;
+                        const rows = csv.split(/\r?\n/).filter(Boolean);
+                        if (rows.length < 2) {
+                            alert('CSV内容无效');
+                            return;
+                        }
+                        const header = rows[0].split(',');
+                        const idIdx = header.indexOf('id');
+                        const titleIdx = header.indexOf('title');
+                        const urlIdx = header.indexOf('url');
+                        const descIdx = header.indexOf('description');
+                        const catIdx = header.indexOf('category');
+                        const iconIdx = header.indexOf('icon');
+                        const visibleIdx = header.indexOf('visible');
+                        const sortIdx = header.indexOf('sort_order');
+                        if (idIdx === -1 || titleIdx === -1 || urlIdx === -1 || catIdx === -1) {
+                            alert('CSV缺少必要字段');
+                            return;
+                        }
+                        const newSites = rows.slice(1).map(row => {
+                            const cols = row.split(',');
+                            return {
+                                id: cols[idIdx],
+                                title: cols[titleIdx],
+                                url: cols[urlIdx],
+                                description: descIdx !== -1 ? cols[descIdx] : '',
+                                category: cols[catIdx],
+                                icon: iconIdx !== -1 ? cols[iconIdx] : '',
+                                visible: visibleIdx !== -1 ? cols[visibleIdx] : '1',
+                                sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                            };
+                        });
+                        this.dataManager.sites = newSites;
+                        this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                        this.dataManager.buildTree();
+                        this.renderTree();
+                        this.renderContent(this.selectedNodeId);
+                        alert('站点导入成功，已覆盖原有站点数据！');
+                    };
+                    reader.readAsText(file, 'utf-8');
+                };
+                input.click();
+            }
+
+            selectNode(nodeId) {
+                this.selectedNodeId = nodeId;
+                
+                // 移除所有选中状态
+                const allItems = document.querySelectorAll('.admin-tree-item');
+                allItems.forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                // 添加选中状态到当前节点
+                const selectedItem = document.querySelector(`.admin-tree-item[data-id="${nodeId}"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('selected');
+                }
+                
+                // 渲染内容
+                this.renderContent(nodeId);
+            }
+
+            expandAll() {
+                const allNodes = document.querySelectorAll('.admin-tree-node');
+                allNodes.forEach(node => {
+                    if (node.querySelector('ul')) {
+                        node.classList.add('expanded');
+                    }
+                });
+                
+                const allToggles = document.querySelectorAll('.toggle');
+                allToggles.forEach(toggle => {
+                    if (toggle.innerHTML !== '') {
+                        toggle.textContent = '▼';
+                    }
+                });
+                
+                const allFolderIcons = document.querySelectorAll('.folder-icon');
+                allFolderIcons.forEach(icon => {
+                    icon.setAttribute('data-expanded', 'true');
+                });
+            }
+
+            collapseAll() {
+                const allNodes = document.querySelectorAll('.admin-tree-node');
+                allNodes.forEach(node => {
+                    node.classList.remove('expanded');
+                });
+                
+                const allToggles = document.querySelectorAll('.toggle');
+                allToggles.forEach(toggle => {
+                    if (toggle.innerHTML !== '') {
+                        toggle.textContent = '▶';
+                    }
+                });
+                
+                const allFolderIcons = document.querySelectorAll('.folder-icon');
+                allFolderIcons.forEach(icon => {
+                    icon.setAttribute('data-expanded', 'false');
+                });
+            }
+
+            renderContent(nodeId) {
+                this.selectedNodeId = nodeId;
+                
+                const itemsContainer = document.getElementById('adminItemsContainer');
+                const contentTitle = document.getElementById('contentTitle');
+                
+                itemsContainer.innerHTML = '';
+                
+                const node = this.dataManager.getNodeById(nodeId);
+                if (!node) {
+                    itemsContainer.innerHTML = '<p>未找到该分类。</p>';
+                    return;
+                }
+                
+                contentTitle.textContent = node.name;
+                
+                const children = this.dataManager.getChildren(nodeId);
+                
+                if (!children || children.length === 0) {
+                    itemsContainer.innerHTML = '<p>该分类下暂无内容。</p>';
+                    return;
+                }
+                
+                children.forEach((item, index) => {
+                    const row = this.createItemRow(item, index);
+                    itemsContainer.appendChild(row);
+                });
+            }
+
+            createItemRow(item, index) {
+                const row = document.createElement('div');
+                row.className = `admin-item-row ${item.type}`;
+                row.dataset.id = item.id;
+                row.style.animationDelay = `${index * 0.05}s`;
+                
+                // 添加拖拽事件
+                row.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    row.classList.add('drag-over');
+                });
+                
+                row.addEventListener('dragleave', () => {
+                    row.classList.remove('drag-over');
+                });
+                
+                row.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    row.classList.remove('drag-over');
+                    this.handleDrop(item.id, e);
+                });
+                
+                const icon = document.createElement('div');
+                icon.className = 'admin-item-icon';
+                
+                if (item.icon) {
+                    const img = document.createElement('img');
+                    img.src = item.icon;
+                    img.alt = item.name;
+                    img.className = 'item-favicon';
+                    img.onerror = function() {
+                        icon.textContent = item.type === 'folder' ? '📁' : '🔗';
+                    };
+                    icon.appendChild(img);
+                } else if (item.type === 'folder') {
+                    icon.textContent = '📁';
+                } else {
+                    icon.textContent = '🔗';
+                }
+                
+                const info = document.createElement('div');
+                info.className = 'admin-item-info';
+                
+                const title = document.createElement('div');
+                title.className = 'admin-item-title';
+                title.textContent = item.name;
+                info.appendChild(title);
+                
+                if (item.description) {
+                    const description = document.createElement('div');
+                    description.className = 'admin-item-description';
+                    description.textContent = item.description;
+                    info.appendChild(description);
+                }
+                
+                if (item.url) {
+                    const url = document.createElement('div');
+                    url.className = 'admin-item-url';
+                    url.textContent = item.url;
+                    info.appendChild(url);
+                }
+                
+                const actions = document.createElement('div');
+                actions.className = 'admin-item-actions';
+                
+                // 拖拽手柄
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'admin-item-action drag-handle';
+                dragHandle.innerHTML = '⋮⋮';
+                dragHandle.setAttribute('draggable', true);
+                dragHandle.title = '拖拽移动';
+                dragHandle.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                    this.draggedItem = item;
+                });
+                actions.appendChild(dragHandle);
+                
+                // 编辑按钮
+                const editBtn = document.createElement('span');
+                editBtn.className = 'admin-item-action';
+                editBtn.innerHTML = '✏️';
+                editBtn.title = '编辑';
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (item.type === 'folder') {
+                        this.showCategoryModal(item);
+                    } else {
+                        this.showSiteModal(item);
+                    }
+                });
+                actions.appendChild(editBtn);
+                
+                // 删除按钮
+                const deleteBtn = document.createElement('span');
+                deleteBtn.className = 'admin-item-action';
+                deleteBtn.innerHTML = '🗑️';
+                deleteBtn.title = '删除';
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`确定要删除"${item.name}"吗？`)) {
+                        this.deleteItem(item);
+                    }
+                });
+                actions.appendChild(deleteBtn);
+                
+                row.appendChild(icon);
+                row.appendChild(info);
+                row.appendChild(actions);
+                
+                // 添加点击事件
+                row.addEventListener('click', () => {
+                    if (item.type === 'folder') {
+                        this.selectNode(item.id);
+                    }
+                });
+                
+                return row;
+            }
+
+            showCategoryModal(category = null) {
+                const modal = document.getElementById('categoryModal');
+                const title = document.getElementById('categoryModalTitle');
+                const form = document.getElementById('categoryForm');
+                
+                // 清空表单
+                form.reset();
+                document.getElementById('categoryId').value = '';
+                
+                // 填充父级分类选项
+                this.populateCategoryOptions('categoryParent');
+                
+                if (category) {
+                    // 编辑模式
+                    title.textContent = '编辑分类';
+                    document.getElementById('categoryId').value = category.id;
+                    document.getElementById('categoryName').value = category.name;
+                    document.getElementById('categoryParent').value = category.parent || '';
+                    document.getElementById('categorySortOrder').value = category.sort_order || 0;
+                } else {
+                    // 新增模式
+                    title.textContent = '添加分类';
+                    document.getElementById('categoryParent').value = this.selectedNodeId !== 'root' ? this.selectedNodeId : '';
+                    document.getElementById('categorySortOrder').value = 0;
+                }
+                
+                modal.style.display = 'block';
+            }
+
+            showSiteModal(site = null) {
+                const modal = document.getElementById('siteModal');
+                const title = document.getElementById('siteModalTitle');
+                const form = document.getElementById('siteForm');
+                
+                // 清空表单
+                form.reset();
+                document.getElementById('siteId').value = '';
+                
+                // 填充分类选项
+                this.populateCategoryOptions('siteCategory');
+                
+                if (site) {
+                    // 编辑模式
+                    title.textContent = '编辑站点';
+                    document.getElementById('siteId').value = site.id;
+                    document.getElementById('siteTitle').value = site.title;
+                    document.getElementById('siteUrl').value = site.url || '';
+                    document.getElementById('siteDescription').value = site.description || '';
+                    document.getElementById('siteCategory').value = site.category || '';
+                    document.getElementById('siteIcon').value = site.icon || '';
+                    document.getElementById('siteVisible').value = site.visible || '1';
+                    document.getElementById('siteSortOrder').value = site.sort_order || 0;
+                } else {
+                    // 新增模式
+                    title.textContent = '添加站点';
+                    document.getElementById('siteCategory').value = this.selectedNodeId !== 'root' ? this.selectedNodeId : '';
+                    document.getElementById('siteVisible').value = '1';
+                    document.getElementById('siteSortOrder').value = 0;
+                }
+                
+                modal.style.display = 'block';
+            }
+
+            populateCategoryOptions(selectId) {
+                const select = document.getElementById(selectId);
+                // 清空除默认选项外的所有选项
+                while (select.children.length > 1) {
+                    select.removeChild(select.lastChild);
+                }
+                // 构建父子映射，减少多次filter
+                const categories = this.dataManager.categories;
+                const childrenMap = {};
+                for (let i = 0; i < categories.length; i++) {
+                    const cat = categories[i];
+                    const parent = cat.parent || null;
+                    if (!childrenMap[parent]) childrenMap[parent] = [];
+                    childrenMap[parent].push(cat);
+                }
+                // 递归添加选项
+                const addOptions = (parentId, level = 0) => {
+                    const currentLevelCategories = childrenMap[parentId] || [];
+                    currentLevelCategories.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+                    for (let i = 0; i < currentLevelCategories.length; i++) {
+                        const cat = currentLevelCategories[i];
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = '\u00A0\u00A0\u00A0\u00A0'.repeat(level) + cat.name;
+                        select.appendChild(option);
+                        addOptions(cat.id, level + 1);
+                    }
+                };
+                addOptions(null, 0);
+            }
+
+            saveCategory() {
+                const categoryId = document.getElementById('categoryId').value;
+                const categoryName = document.getElementById('categoryName').value;
+                const categoryParent = document.getElementById('categoryParent').value;
+                const categorySortOrder = parseInt(document.getElementById('categorySortOrder').value) || 0;
+                
+                if (!categoryName) {
+                    alert('请输入分类名称');
+                    return;
+                }
+                
+                // 查找是否已存在该分类
+                const existingCategoryIndex = this.dataManager.categories.findIndex(cat => cat.id === categoryId);
+                
+                if (existingCategoryIndex >= 0) {
+                    // 更新现有分类
+                    this.dataManager.categories[existingCategoryIndex] = {
+                        id: categoryId,
+                        name: categoryName,
+                        parent: categoryParent,
+                        sort_order: categorySortOrder
+                    };
+                } else {
+                    // 添加新分类
+                    const newId = 'cat_' + Date.now();
+                    this.dataManager.categories.push({
+                        id: categoryId || newId,
+                        name: categoryName,
+                        parent: categoryParent,
+                        sort_order: categorySortOrder
+                    });
+                }
+                
+                // 重新构建数据和树结构
+                this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                this.dataManager.buildTree();
+                this.renderTree();
+                this.renderContent(this.selectedNodeId);
+                this.dataManager.saveToLocal();
+                
+                // 关闭模态框
+                document.getElementById('categoryModal').style.display = 'none';
+            }
+
+            saveSite() {
+                const siteId = document.getElementById('siteId').value;
+                const siteTitle = document.getElementById('siteTitle').value;
+                const siteUrl = document.getElementById('siteUrl').value;
+                const siteDescription = document.getElementById('siteDescription').value;
+                const siteCategory = document.getElementById('siteCategory').value;
+                const siteIcon = document.getElementById('siteIcon').value;
+                const siteVisible = document.getElementById('siteVisible').value;
+                const siteSortOrder = parseInt(document.getElementById('siteSortOrder').value) || 0;
+                
+                if (!siteTitle || !siteUrl) {
+                    alert('请输入站点标题和网址');
+                    return;
+                }
+                
+                try {
+                    new URL(siteUrl);
+                } catch (e) {
+                    alert('请输入有效的网址');
+                    return;
+                }
+                
+                // 查找是否已存在该站点
+                const existingSiteIndex = this.dataManager.sites.findIndex(site => site.id === siteId);
+                
+                if (existingSiteIndex >= 0) {
+                    // 更新现有站点
+                    this.dataManager.sites[existingSiteIndex] = {
+                        id: siteId,
+                        title: siteTitle,
+                        url: siteUrl,
+                        description: siteDescription,
+                        category: siteCategory,
+                        icon: siteIcon,
+                        visible: siteVisible,
+                        sort_order: siteSortOrder
+                    };
+                } else {
+                    // 添加新站点
+                    const newId = 'site_' + Date.now();
+                    this.dataManager.sites.push({
+                        id: siteId || newId,
+                        title: siteTitle,
+                        url: siteUrl,
+                        description: siteDescription,
+                        category: siteCategory,
+                        icon: siteIcon,
+                        visible: siteVisible,
+                        sort_order: siteSortOrder
+                    });
+                }
+                
+                // 重新构建数据和树结构
+                this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                this.dataManager.buildTree();
+                this.renderTree();
+                this.renderContent(this.selectedNodeId);
+                this.dataManager.saveToLocal();
+                
+                // 关闭模态框
+                document.getElementById('siteModal').style.display = 'none';
+            }
+
+            deleteItem(item) {
+                if (item.type === 'folder') {
+                    // 删除分类
+                    this.dataManager.categories = this.dataManager.categories.filter(cat => cat.id !== item.id);
+                    
+                    // 同时删除该分类下的所有站点
+                    this.dataManager.sites = this.dataManager.sites.filter(site => site.category !== item.id);
+                } else {
+                    // 删除站点
+                    this.dataManager.sites = this.dataManager.sites.filter(site => site.id !== item.id);
+                }
+                
+                // 重新构建数据和树结构
+                this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                this.dataManager.buildTree();
+                this.renderTree();
+                this.renderContent(this.selectedNodeId);
+                this.dataManager.saveToLocal();
+            }
+
+            handleDrop(targetId, e) {
+                const draggedId = e.dataTransfer.getData('text/plain');
+                if (draggedId === targetId) return;
+                
+                // 在实际项目中，这里应该处理拖拽逻辑并更新数据源
+                // 目前我们只显示一个提示
+                alert(`拖拽功能已触发：将ID为"${draggedId}"的项目移动到ID为"${targetId}"的目标位置，实际项目中会在这里更新数据源`);
+                
+                this.renderContent(this.selectedNodeId);
+                this.renderTree();
+            }
+
+            exportCategories() {
+                // 导出分类数据为CSV文件
+                const fields = ['id','name','parent','sort_order'];
+                const csvRows = [];
+                csvRows.push(fields.join(','));
+                this.dataManager.categories.forEach(cat => {
+                    const row = fields.map(f => {
+                        let val = cat[f] !== undefined ? cat[f] : '';
+                        if (typeof val === 'string' && (val.includes(',') || val.includes('"') || val.includes('\n'))) {
+                            val = '"' + val.replace(/"/g, '""') + '"';
+                        }
+                        return val;
+                    });
+                    csvRows.push(row.join(','));
+                });
+                const csvContent = csvRows.join('\r\n');
+                const blob = new Blob([csvContent], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'categories.csv';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            exportSites() {
+                // 导出站点数据为CSV文件
+                const fields = ['id','title','url','description','category','icon','visible','sort_order'];
+                const csvRows = [];
+                csvRows.push(fields.join(','));
+                this.dataManager.sites.forEach(site => {
+                    const row = fields.map(f => {
+                        let val = site[f] !== undefined ? site[f] : '';
+                        // 转义逗号和引号
+                        if (typeof val === 'string' && (val.includes(',') || val.includes('"') || val.includes('\n'))) {
+                            val = '"' + val.replace(/"/g, '""') + '"';
+                        }
+                        return val;
+                    });
+                    csvRows.push(row.join(','));
+                });
+                const csvContent = csvRows.join('\r\n');
+                const blob = new Blob([csvContent], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'sites.csv';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 100);
+            }
+
+            importCategories() {
+                // 严格按新字段定义解析categories.csv
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const csv = evt.target.result;
+                        const rows = csv.split(/\r?\n/).filter(Boolean);
+                        if (rows.length < 2) {
+                            alert('CSV内容无效');
+                            return;
+                        }
+                        const header = rows[0].split(',');
+                        const idIdx = header.indexOf('id');
+                        const nameIdx = header.indexOf('name');
+                        const parentIdx = header.indexOf('parent');
+                        const sortIdx = header.indexOf('sort_order');
+                        if (idIdx === -1 || nameIdx === -1 || parentIdx === -1) {
+                            alert('CSV缺少必要字段');
+                            return;
+                        }
+                        const newCategories = rows.slice(1).map(row => {
+                            const cols = row.split(',');
+                            return {
+                                id: cols[idIdx],
+                                name: cols[nameIdx],
+                                parent: cols[parentIdx],
+                                sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                            };
+                        });
+                        this.dataManager.categories = newCategories;
+                        this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                        this.dataManager.buildTree();
+                        this.renderTree();
+                        this.renderContent(this.selectedNodeId);
+                        alert('分类导入成功，已覆盖原有分类数据！');
+                        this.dataManager.saveToLocal();
+                    };
+                    reader.readAsText(file, 'utf-8');
+                };
+                input.click();
+            }
+
+            importSites() {
+                // 严格按新字段定义解析sites.csv
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.csv';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        const csv = evt.target.result;
+                        const rows = csv.split(/\r?\n/).filter(Boolean);
+                        if (rows.length < 2) {
+                            alert('CSV内容无效');
+                            return;
+                        }
+                        const header = rows[0].split(',');
+                        const idIdx = header.indexOf('id');
+                        const titleIdx = header.indexOf('title');
+                        const urlIdx = header.indexOf('url');
+                        const descIdx = header.indexOf('description');
+                        const catIdx = header.indexOf('category');
+                        const iconIdx = header.indexOf('icon');
+                        const visibleIdx = header.indexOf('visible');
+                        const sortIdx = header.indexOf('sort_order');
+                        if (idIdx === -1 || titleIdx === -1 || urlIdx === -1 || catIdx === -1) {
+                            alert('CSV缺少必要字段');
+                            return;
+                        }
+                        const newSites = rows.slice(1).map(row => {
+                            const cols = row.split(',');
+                            return {
+                                id: cols[idIdx],
+                                title: cols[titleIdx],
+                                url: cols[urlIdx],
+                                description: descIdx !== -1 ? cols[descIdx] : '',
+                                category: cols[catIdx],
+                                icon: iconIdx !== -1 ? cols[iconIdx] : '',
+                                visible: visibleIdx !== -1 ? cols[visibleIdx] : '1',
+                                sort_order: sortIdx !== -1 ? parseInt(cols[sortIdx], 10) || 0 : 0
+                            };
+                        });
+                        this.dataManager.sites = newSites;
+                        this.dataManager.data = this.dataManager.buildDataFromCategoriesAndSites();
+                        this.dataManager.buildTree();
+                        this.renderTree();
+                        this.renderContent(this.selectedNodeId);
+                        alert('站点导入成功，已覆盖原有站点数据！');
+                        this.dataManager.saveToLocal();
+                    };
+                    reader.readAsText(file, 'utf-8');
+                };
+                input.click();
+            }
+
+            handleFileImport(file) {
+                // 在实际项目中，这里应该解析文件并导入数据
+                alert(`文件"${file.name}"导入功能已触发，实际项目中会在这里处理文件导入`);
+            }
+    }
+
+// -------------- AdminManager 类定义到此结束 --------------
+    // 初始化管理页面
+    document.addEventListener('DOMContentLoaded', () => {
+            const adminManager = new AdminManager();
+            adminManager.init();
+        });
+    </script>
+</body>
+</html>

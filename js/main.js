@@ -18,39 +18,39 @@ document.addEventListener('DOMContentLoaded', async function() {
     // 初始化树形渲染器
     window.treeRenderer = new TreeRenderer('folderTree', dataManager);
 
-    // 加载数据
+    // 加载基础分类数据（异步，不阻塞页面渲染）
     try {
-        await dataManager.loadData();
-        console.log('数据加载完成');
+        await dataManager.loadCategories();
+        console.log('基础分类数据加载完成');
 
-        // 渲染树形结构
+        // 渲染树形结构（只包含分类）
         treeRenderer.renderTree();
 
         // 默认显示根节点内容
-        renderContent('root');
+        await renderContent('root');
 
         // 初始化导航历史
         navigationHistory = ['root'];
         updateBackButton();
     } catch (error) {
-        console.error('数据加载失败:', error);
-        alert('数据加载失败，请检查 data/categories.csv 和 data/sites.csv 格式及内容！');
+        console.error('基础数据加载失败:', error);
+        alert('基础数据加载失败，请检查 data/categories.csv 格式及内容！');
         // 创建示例数据文件
         createSampleData();
     }
 
     // 绑定搜索功能
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    document.getElementById('searchInput').addEventListener('keypress', async function(e) {
         if (e.key === 'Enter') {
-            handleSearch();
+            await handleSearch();
         }
     });
 
     // 监听节点选中事件
-    document.addEventListener('nodeSelected', function(e) {
+    document.addEventListener('nodeSelected', async function(e) {
         const nodeId = e.detail.nodeId;
-        renderContent(nodeId);
+        await renderContent(nodeId);
     });
 
     // 黑暗模式切换
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async function() {
  * 渲染内容区域
  * @param {string} nodeId - 节点ID
  */
-function renderContent(nodeId) {
+async function renderContent(nodeId) {
     // 更新当前节点ID
     currentNodeId = nodeId;
 
@@ -134,6 +134,20 @@ function renderContent(nodeId) {
 
     // 渲染面包屑
     renderBreadcrumb(nodeId);
+
+    // 检查是否需要加载站点数据
+    // 如果当前节点不是根节点，且不是分类节点，则需要加载站点数据
+    if (nodeId !== 'root' && node.type === 'folder') {
+        try {
+            // 按需加载站点数据
+            await dataManager.getFullData();
+            console.log('已按需加载站点数据');
+        } catch (error) {
+            console.error('站点数据加载失败:', error);
+            itemsContainer.innerHTML = '<p>站点数据加载失败，请稍后重试。</p>';
+            return;
+        }
+    }
 
     // 获取子项
     const children = dataManager.getChildren(nodeId);
@@ -238,11 +252,11 @@ function createItemRow(item, index) {
     row.appendChild(info);
     
     // 添加点击事件
-    row.addEventListener('click', () => {
+    row.addEventListener('click', async () => {
         if (item.type === 'folder') {
             // 选中文件夹
             treeRenderer.selectNode(item.id);
-            renderContent(item.id);
+            await renderContent(item.id);
         } else if (item.type === 'link') {
             // 打开链接
             window.open(item.url, '_blank');
@@ -277,9 +291,9 @@ function renderBreadcrumb(nodeId) {
         if (index === path.length - 1) {
             item.style.fontWeight = 'bold';
         } else {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 treeRenderer.selectNode(node.id);
-                renderContent(node.id);
+                await renderContent(node.id);
             });
         }
         
@@ -293,30 +307,38 @@ function renderBreadcrumb(nodeId) {
 /**
  * 处理搜索
  */
-function handleSearch() {
+async function handleSearch() {
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) return;
 
-    const results = dataManager.search(keyword);
-
+    // 显示加载状态
     const itemsContainer = document.getElementById('itemsContainer');
-    // 保留返回按钮
-    const backButton = document.getElementById('backButton');
-    itemsContainer.innerHTML = `<h2>搜索结果: "${keyword}"</h2>`;
+    itemsContainer.innerHTML = `<h2>搜索中: "${keyword}"</h2><p>正在加载搜索功能...</p>`;
 
-    if (results.length === 0) {
-        itemsContainer.innerHTML += '<p>未找到匹配的结果，请尝试其他关键词。</p>';
+    try {
+        const results = await dataManager.search(keyword);
+
+        // 保留返回按钮
+        const backButton = document.getElementById('backButton');
+        itemsContainer.innerHTML = `<h2>搜索结果: "${keyword}"</h2>`;
+
+        if (results.length === 0) {
+            itemsContainer.innerHTML += '<p>未找到匹配的结果，请尝试其他关键词。</p>';
+            updateDarkModeClasses();
+            return;
+        }
+
+        results.forEach((item, index) => {
+            const row = createSearchResultRow(item, keyword, index);
+            itemsContainer.appendChild(row);
+        });
+
+        // 应用黑暗模式类
         updateDarkModeClasses();
-        return;
+    } catch (error) {
+        console.error('搜索失败:', error);
+        itemsContainer.innerHTML = `<h2>搜索失败</h2><p>搜索功能暂时不可用，请稍后重试。</p>`;
     }
-
-    results.forEach((item, index) => {
-        const row = createSearchResultRow(item, keyword, index);
-        itemsContainer.appendChild(row);
-    });
-
-    // 应用黑暗模式类
-    updateDarkModeClasses();
 }
 
 /**
@@ -386,11 +408,11 @@ function createSearchResultRow(item, keyword, index) {
     row.appendChild(info);
     
     // 添加点击事件
-    row.addEventListener('click', () => {
+    row.addEventListener('click', async () => {
         if (item.type === 'folder') {
             // 选中文件夹
             treeRenderer.selectNode(item.id);
-            renderContent(item.id);
+            await renderContent(item.id);
         } else if (item.type === 'link') {
             // 打开链接
             window.open(item.url, '_blank');
@@ -510,7 +532,7 @@ function updateDarkModeClasses() {
 /**
  * 返回上一级
  */
-function goBack() {
+async function goBack() {
     if (navigationHistory.length <= 1) {
         return; // 已经在根目录，无法再返回
     }
@@ -523,7 +545,7 @@ function goBack() {
     
     // 更新视图
     treeRenderer.selectNode(previousNodeId);
-    renderContent(previousNodeId);
+    await renderContent(previousNodeId);
 }
 
 /**
@@ -538,11 +560,11 @@ function updateBackButton() {
 /**
  * 返回首页
  */
-function goToHome() {
+async function goToHome() {
     // 清空搜索框
     document.getElementById('searchInput').value = '';
     
     // 选中根节点
     treeRenderer.selectNode('root');
-    renderContent('root');
+    await renderContent('root');
 }

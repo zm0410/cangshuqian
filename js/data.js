@@ -21,24 +21,69 @@ class DataManager {
     }
 
     /**
-     * 加载 categories.csv 和 sites.csv
-     * @returns {Promise<Array>} 返回加载的数据
+     * 加载 categories.csv（基础分类数据）
+     * @returns {Promise<Array>} 返回分类数据
      */
-    async loadData() {
+    async loadCategories() {
         try {
-            const [categories, sites] = await Promise.all([
-                this.loadCsv('data/categories.csv'),
-                this.loadCsv('data/sites.csv')
-            ]);
-            this.categories = categories;
-            this.sites = sites.filter(site => site.visible === '1' || site.visible === 1);
+            this.categories = await this.loadCsv('data/categories.csv');
+            // 只构建基础树结构（不含站点数据）
             this.data = this.buildDataFromCategoriesAndSites();
             this.buildTree();
-            return this.data;
+            return this.categories;
         } catch (error) {
-            console.error('数据加载失败:', error);
+            console.error('分类数据加载失败:', error);
             throw error;
         }
+    }
+
+    /**
+     * 异步加载 sites.csv（仅在需要时加载）
+     * @returns {Promise<Array>} 返回站点数据
+     */
+    async loadSites() {
+        try {
+            if (this.sites.length === 0) {
+                console.log('开始异步加载站点数据...');
+                const sites = await this.loadCsv('data/sites.csv');
+                this.sites = sites.filter(site => site.visible === '1' || site.visible === 1);
+                console.log('站点数据加载完成，共加载', this.sites.length, '个站点');
+            }
+            return this.sites;
+        } catch (error) {
+            console.error('站点数据加载失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 获取指定分类的站点数据（按需加载）
+     * @param {string} categoryId - 分类ID
+     * @returns {Promise<Array>} 返回该分类下的站点数据
+     */
+    async getSitesByCategory(categoryId) {
+        await this.loadSites(); // 确保站点数据已加载
+        return this.sites.filter(site => site.category === categoryId);
+    }
+
+    /**
+     * 获取所有站点数据（按需加载）
+     * @returns {Promise<Array>} 返回所有站点数据
+     */
+    async getAllSites() {
+        await this.loadSites(); // 确保站点数据已加载
+        return this.sites;
+    }
+
+    /**
+     * 获取完整的树形数据（按需加载站点数据）
+     * @returns {Promise<Array>} 返回完整的数据
+     */
+    async getFullData() {
+        await this.loadSites(); // 确保站点数据已加载
+        this.data = this.buildDataFromCategoriesAndSites();
+        this.buildTree();
+        return this.data;
     }
 
     /**
@@ -213,12 +258,47 @@ class DataManager {
     }
 
     /**
+     * 异步加载pinyin-pro库
+     * @returns {Promise<Object>} pinyinPro对象
+     */
+    async loadPinyinPro() {
+        if (window.pinyinPro) {
+            return window.pinyinPro;
+        }
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/pinyin-pro@3.19.6/dist/index.js';
+            script.onload = () => {
+                console.log('pinyin-pro库加载完成');
+                resolve(window.pinyinPro);
+            };
+            script.onerror = (error) => {
+                console.error('pinyin-pro库加载失败:', error);
+                reject(error);
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
      * 搜索功能
      * @param {string} keyword - 搜索关键词
-     * @returns {Array<Object>} 搜索结果数组
+     * @returns {Promise<Array<Object>>} 搜索结果数组
      */
-    search(keyword) {
+    async search(keyword) {
         if (!keyword) return [];
+        
+        // 按需加载pinyin-pro库
+        let pinyinPro;
+        try {
+            pinyinPro = await this.loadPinyinPro();
+        } catch (error) {
+            console.error('pinyin-pro库加载失败，使用普通搜索:', error);
+            // 如果库加载失败，使用普通搜索（仅匹配原始文本）
+            return this.simpleSearch(keyword);
+        }
+        
         keyword = keyword.toLowerCase().trim();
         const results = [];
         const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
@@ -236,6 +316,35 @@ class DataManager {
             const urlMatch = node.url &&
                 (node.url.toLowerCase().includes(keyword) ||
                  node.url.toLowerCase().includes(pinyinKeyword));
+            if (nameMatch || descriptionMatch || urlMatch) {
+                const result = { ...node };
+                if (nameMatch) result.nameMatch = true;
+                if (descriptionMatch) result.descriptionMatch = true;
+                if (urlMatch) result.urlMatch = true;
+                results.push(result);
+            }
+            if (node.children && node.children.length > 0) {
+                stack.push(...node.children);
+            }
+        }
+        return results;
+    }
+
+    /**
+     * 普通搜索（不使用拼音转换）
+     * @param {string} keyword - 搜索关键词
+     * @returns {Array<Object>} 搜索结果数组
+     */
+    simpleSearch(keyword) {
+        if (!keyword) return [];
+        keyword = keyword.toLowerCase().trim();
+        const results = [];
+        const stack = [...this.treeData.children];
+        while (stack.length > 0) {
+            const node = stack.pop();
+            const nameMatch = node.name && node.name.toLowerCase().includes(keyword);
+            const descriptionMatch = node.description && node.description.toLowerCase().includes(keyword);
+            const urlMatch = node.url && node.url.toLowerCase().includes(keyword);
             if (nameMatch || descriptionMatch || urlMatch) {
                 const result = { ...node };
                 if (nameMatch) result.nameMatch = true;

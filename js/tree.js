@@ -36,7 +36,7 @@ class TreeRenderer {
     }
 
     /**
-     * 创建树节点
+     * 创建树节点 - 优化版本
      * @param {Object} node - 节点数据
      * @param {boolean} isRoot - 是否为根节点
      * @param {number} depth - 节点深度
@@ -45,100 +45,69 @@ class TreeRenderer {
     createTreeNode(node, isRoot = false, depth = 0) {
         const li = document.createElement('li');
         li.className = 'tree-node';
-        
-        // 添加动画延迟
         li.style.animationDelay = `${depth * 0.1}s`;
         
         const hasChildren = node.children && node.children.length > 0;
         
-        const div = document.createElement('div');
-        div.className = 'tree-item';
-        div.dataset.id = node.id;
+        // 使用模板字符串优化DOM创建
+        const toggleIcon = hasChildren ? '▶' : '';
+        const nodeIcon = node.type === 'folder' ? 'folder-icon' : 'link-icon';
         
-        // 如果是链接类型，使整个div可点击
-        if (node.type === 'link') {
-            div.className += ' tree-link-item';
-            div.addEventListener('click', (e) => {
-                e.stopPropagation();
-                window.open(node.url, '_blank');
-            });
-        }
+        li.innerHTML = `
+            <div class="tree-item${node.type === 'link' ? ' tree-link-item' : ''}" data-id="${node.id}">
+                <span class="toggle">${toggleIcon}</span>
+                <span class="icon ${nodeIcon}"></span>
+                ${node.type === 'link' ? 
+                    `<a href="${node.url}" target="_blank" class="tree-link"><span class="name">${node.name}</span></a>` :
+                    `<span class="name">${node.name}</span>`
+                }
+            </div>
+        `;
         
-        // 切换按钮（仅对有子节点的节点）
-        const toggle = document.createElement('span');
-        toggle.className = 'toggle';
-        if (hasChildren) {
-            toggle.textContent = '▶';
-        }
-        div.appendChild(toggle);
+        const div = li.querySelector('.tree-item');
         
-        // 图标
-        const icon = document.createElement('span');
-        icon.className = 'icon';
-        if (node.type === 'folder') {
-            icon.classList.add('folder-icon');
-        } else {
-            icon.classList.add('link-icon');
-        }
-        div.appendChild(icon);
-        
-        // 节点名称
-        const name = document.createElement('span');
-        name.className = 'name';
-        name.textContent = node.name;
-        
-        // 如果是链接类型，包装在一个链接中
-        if (node.type === 'link') {
-            const link = document.createElement('a');
-            link.href = node.url;
-            link.target = '_blank';
-            link.className = 'tree-link';
-            link.appendChild(name);
-            div.appendChild(link);
-        } else {
-            div.appendChild(name);
-        }
-        
+        // 事件委托优化
         div.addEventListener('click', (e) => {
-            // 链接类型的节点已经在上面处理过了
-            if (node.type === 'link') {
-                return;
-            }
-            
             e.stopPropagation();
             
-            // 如果点击的是切换按钮，则只切换展开/收起状态
-            if (e.target === toggle) {
+            // 处理链接点击
+            if (node.type === 'link') {
+                return; // 让默认的链接行为处理
+            }
+            
+            const toggle = e.target.closest('.toggle');
+            if (toggle) {
+                // 切换展开/收起状态
                 li.classList.toggle('expanded');
                 toggle.textContent = li.classList.contains('expanded') ? '▼' : '▶';
                 
                 // 更新文件夹图标状态
-                if (node.type === 'folder') {
-                    const folderIcon = div.querySelector('.folder-icon');
-                    if (folderIcon) {
-                        folderIcon.setAttribute('data-expanded', li.classList.contains('expanded'));
-                    }
+                const folderIcon = div.querySelector('.folder-icon');
+                if (folderIcon) {
+                    folderIcon.setAttribute('data-expanded', li.classList.contains('expanded'));
                 }
                 return;
             }
             
-            // 否则选中节点（仅对文件夹）
+            // 选中文件夹节点
             if (node.type === 'folder') {
                 this.selectNode(node.id);
             }
         });
         
-        li.appendChild(div);
-        
-        // 递归创建子节点
+        // 递归创建子节点（批量处理）
         if (hasChildren) {
             const ul = document.createElement('ul');
-            node.children.forEach((child, index) => {
+            const fragment = document.createDocumentFragment();
+            
+            for (let i = 0; i < node.children.length; i++) {
+                const child = node.children[i];
                 const childNode = this.createTreeNode(child, false, depth + 1);
-                // 添加延迟动画效果
-                childNode.style.animationDelay = `${(depth + 1) * 0.1 + index * 0.05}s`;
-                ul.appendChild(childNode);
-            });
+                childNode.style.animationDelay = `${(depth + 1) * 0.1 + i * 0.05}s`;
+                fragment.appendChild(childNode);
+            }
+            
+            ul.appendChild(fragment);
             li.appendChild(ul);
         }
         

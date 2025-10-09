@@ -1,306 +1,386 @@
-id,name,parent,sort_order
-new_1,影音娱乐,,0
-new_2,图书阅读,,1
-new_3,资源搜索,,2
-new_4,AI工具,,3
-new_5,软件工具,,4
-new_6,学习教育,,5
-new_7,生活休闲,new_217,6
-new_8,设计素材,,7
-new_9,职业考试,new_8,8
-new_10,常用网站,,9
-new_11,网页　综合（在线／下载）,new_1,1
-new_12,VIP视频解析接口（需手动操作）,new_11,2
-new_13,网页　综合（聚合搜索）,new_1,3
-new_14,网页　综合（仅下载）,new_1,4
-new_15,网页　仅电视剧（在线／下载）,new_1,5
-new_16,网页　仅电视剧（仅下载）,new_1,6
-new_17,网页　动漫（在线）,new_1,7
-new_18,网页　动漫（仅下载）,new_1,8
-new_19,TV版可用官方客户端,new_1,10
-new_20,以下APP可使用手机端会员／省去开TV版会员的钱,new_19,11
-new_21,TV版网盘客户端,new_1,12
-new_22,TV版浏览器,new_1,13
-new_23,国内几大影视网站（在线／下载）,new_1,19
-new_24,1080P／2K／4K／生肉资源,new_1,20
-new_25,手机／平板软件,new_1,21
-new_26,网页　找字幕,new_1,22
-new_27,聚合搜索,new_2,25
-new_28,优质书站,new_2,26
-new_29,网络小说,new_2,27
-new_30,轻小说,new_2,28
-new_31,多数轻小说你都能在对应的「百度贴吧」找到下载地址，甚至会有贴吧大佬翻译,new_30,29
-new_32,杂志,new_2,30
-new_33,教材,new_2,31
-new_34,专业类书籍,new_2,32
-new_35,国外电子书,new_2,33
-new_36,书荒找书,new_2,34
-new_37,古籍,new_2,35
-new_38,本地阅读器请看6－4－2栏,new_2,37
-new_39,冬瓜音乐,new_2,43
-new_40,青听音乐,new_2,44
-new_41,EMO音乐,new_2,45
-new_42,元力音乐,new_2,46
-new_43,天天悦听,new_2,47
-new_44,音乐适配,new_2,48
-new_45,简乐,new_2,49
-new_46,ChatGPT提示词,new_4,57
-new_47,深度求索－DeepSeek,new_4,59
-new_48,AI绘画教程,new_4,62
-new_49,AI绘画模型下载站,new_4,63
-new_50,AI绘画关键词,new_4,64
-new_51,特惠福利精选,,75
-new_52,聊天记录,new_5,78
-new_53,公众号文章,new_5,79
-new_54,视频号,new_5,80
-new_55,其他内容,new_5,81
-new_56,朋友圈,new_5,82
-new_57,好友清理,new_5,83
-new_58,手机浏览器,new_5,85
-new_59,雨见／可拓／Rains 浏览器（支持扩展）,new_58,86
-new_60,海阔视界／嗅觉浏览器,new_58,87
-new_61,电脑浏览器,new_5,88
-new_62,360极速浏览器X（需要兼容Flash时推荐使用）,new_61,89
-new_63,免翻墙脚本下载站,new_5,90
-new_64,脚本推荐,new_5,91
-new_65,B站评论区广告水军标记,new_64,92
-new_66,哔哩哔哩收藏夹失效视频显示,new_64,93
-new_67,Discuz 论坛自动回复,new_64,94
-new_68,Discuz 论坛快捷回复,new_64,95
-new_69,隐藏搜索结果中的垃圾结果,new_64,96
-new_70,显示公众号历史消息链接,new_64,97
-new_71,免翻墙扩展下载站,new_5,98
-new_72,扩展推荐,new_5,99
-new_73,必备,new_72,100
-new_74,视频,new_72,101
-new_75,图片,new_72,102
-new_76,网页保存,new_72,103
-new_77,AI,new_72,104
-new_78,批量搜索提问,new_5,105
-new_79,资源嗅探下载,new_5,107
-new_80,BT磁力资源下载,new_5,108
-new_81,离线下载服务,new_5,109
-new_82,夸克网盘,new_81,110
-new_83,网盘资源下载,new_5,111
-new_84,谷歌版APP下载,new_5,112
-new_85,文档资源下载,new_5,113
-new_86,短视频下载,new_5,114
-new_87,Bilibili视频下载,new_5,115
-new_88,YouTube视频下载,new_5,116
-new_89,───────────,new_88,117
-new_90,Instagram下载,new_5,118
-new_91,iOS复制ins图片链接，然后在Safari打开，长按图片复制，然后在系统备忘录粘贴，最后就能保存到相册了,new_90,119
-new_92,安卓复制ins图片链接，然后在夸克／百度／QQ浏览器打开，长按图片即可保存,new_90,120
-new_93,网课下载,new_5,121
-new_94,直播录制,new_5,122
-new_95,WPS,new_5,124
-new_96,微信公众号「WPS会员」每日签到可得1天免费会员,new_95,125
-new_97,电子书阅读器,new_5,126
-new_98,Sumatra PDF,new_97,127
-new_99,PDF阅读器,new_5,128
-new_100,PDF编辑器,new_5,129
-new_101,PDF-XChange Editor（集成OCR组件）,new_100,130
-new_102,PDF转换,new_5,131
-new_103,iLovePDF（＜100M，每天限4次）,new_102,132
-new_104,Smallpdf（＜15M，每天限2次）,new_102,133
-new_105,Microsoft Office（含免费PDF转Word）,new_102,134
-new_106,音乐播放,new_5,136
-new_107,音频编辑,new_5,137
-new_108,本地视频播放,new_5,138
-new_109,网络视频播放,new_5,139
-new_110,斗鱼直播极速版,new_109,140
-new_111,屏幕录制,new_5,141
-new_112,视频剪辑,new_5,142
-new_113,视频去水印,new_5,143
-new_114,音视频转文字,new_5,144
-new_115,音视频转码,new_5,145
-new_116,文字转音频,new_5,146
-new_117,游戏加速器,new_5,148
-new_118,Folo,new_5,153
-new_119,加密音频／视频解码,new_5,156
-new_120,变声器,new_5,157
-new_121,笔记,new_5,159
-new_122,以下平台都可自定义题库，完全免费或部分免费,new_5,161
-new_123,Win软件下载站,new_5,164
-new_124,Mac软件下载站,new_5,165
-new_125,万人点赞的Mac软件推荐项目,new_124,166
-new_126,正版软件打折渠道,new_124,167
-new_127,一键安装版,new_5,169
-new_128,PS在线版,new_5,170
-new_129,PS单文件版,new_5,171
-new_130,系统重装／PE工具,new_5,173
-new_131,系统镜像,new_5,174
-new_132,系统还原,new_5,175
-new_133,虚拟机,new_5,176
-new_134,系统清理,new_5,177
-new_135,系统优化,new_5,178
-new_136,杀毒／安全,new_5,179
-new_137,数据恢复,new_5,180
-new_138,系统修复,new_5,181
-new_139,驱动管理,new_5,182
-new_140,窗口工具,new_5,183
-new_141,防蓝光护眼,new_5,184
-new_142,电源电池管理,new_5,185
-new_143,以下软件并不限制电脑品牌，但能否在你电脑上正常使用，请自行测试,new_142,186
-new_144,笔记本,new_5,188
-new_145,台式机装机,new_5,189
-new_146,综合科普,new_145,190
-new_147,CPU,new_145,191
-new_148,主板,new_145,192
-new_149,显卡,new_145,193
-new_150,硬盘,new_145,194
-new_151,固态硬盘,new_150,195
-new_152,机械硬盘,new_150,196
-new_153,散热,new_145,197
-new_154,电源,new_145,198
-new_155,机箱,new_145,199
-new_156,显示器,new_145,200
-new_157,装机配置推荐,new_145,201
-new_158,装机步骤,new_145,202
-new_159,硬件检测,new_145,203
-new_160,台式机整机购买,new_5,204
-new_161,耳机,new_5,205
-new_162,键盘,new_5,206
-new_163,鼠标,new_5,207
-new_164,内存条,new_5,208
-new_165,Office,new_5,210
-new_166,Office插件,new_5,211
-new_167,文档去重对比,new_5,212
-new_168,文档修复,new_5,213
-new_169,思维导图,new_5,214
-new_170,流程图,new_5,215
-new_171,CAJ转换,new_5,216
-new_172,文献管理,new_5,217
-new_173,看图,new_5,219
-new_174,截图,new_5,220
-new_175,拼图,new_5,221
-new_176,压缩／放大,new_5,222
-new_177,格式转换,new_5,223
-new_178,图片管理,new_5,224
-new_179,OCR图片文字识别,new_5,225
-new_180,GIF动图录制,new_5,226
-new_181,微信 4.0.6.21  多开 + 防撤回版,new_5,228
-new_182,安卓模拟器,new_5,230
-new_183,桌面整理,new_5,231
-new_184,小智桌面（支持云备份桌面）,new_183,232
-new_185,抽签抽奖,new_5,233
-new_186,财务相关,new_5,234
-new_187,打字练习,new_5,235
-new_188,进销存管理,new_5,236
-new_189,排课系统,new_5,237
-new_190,CAD2018以后就自带PDF转DWG功能了,new_5,239
-new_191,效率／办公,new_7,244
-new_192,清单／番茄钟,new_191,245
-new_193,证件照,new_191,246
-new_194,文档扫描,new_191,247
-new_195,邮箱,new_191,248
-new_196,百度网盘内部版 11.16.3,new_191,249
-new_197,英语,new_7,251
-new_198,每日英语听力没有稳定可用的破解版不要再求了！实在喜欢建议入正,new_197,252
-new_199,听歌学英语（不错的扩充词汇方式）,new_197,253
-new_200,VDO  English（阿虚用过最棒的英语视频APP）,new_197,254
-new_201,Pleco（最好用的汉英词典）,new_197,255
-new_202,Vocabulary（阿虚最喜欢的英英词典）,new_197,256
-new_203,韦氏词典 Merriam-Webster Dictionary（复杂单词必查的英英词典）,new_197,257
-new_204,驾照,new_7,258
-new_205,健身,new_7,259
-new_206,普通话,new_7,260
-new_207,课程表,new_7,261
-new_208,抠图,new_7,263
-new_209,天天P图,new_208,264
-new_210,Backgroud Eraser,new_208,265
-new_211,P图,new_7,266
-new_212,Adobe Lightroom 破解版,new_211,267
-new_213,新闻,new_7,270
-new_214,虚拟定位／刷步,new_7,276
-new_215,应用多开／手机分身,new_7,277
-new_216,品牌安卓自带分身功能,new_215,278
-new_217,免费搜题,new_7,280
-new_218,医疗健康,new_7,282
-new_219,IPA资源下载站,new_218,283
-new_220,TrollStore 作者已经找到了支持 iOS 17.0的方法，尽量不要升级,new_219,284
-new_221,只提供绿色软件,new_10,291
-new_222,免费,new_10,294
-new_223,半收费半免费,new_10,295
-new_224,免费简历模板下载,new_10,297
-new_225,免费在线简历制作,new_10,298
-new_226,会员拼车合租,new_10,299
-new_227,导购,new_10,301
-new_228,想要高性价比＆买前避坑：可以到以下网站搜搜相关评测，看看评论区的评价,new_227,302
-new_229,返利网站,new_10,303
-new_230,建议尽量自推自买ｏｒ用官方返利平台：虽然返利比例可能会低一点，但没有中间商赚差价,new_229,304
-new_231,临时网盘,new_10,306
-new_232,破解游戏下载,new_10,308
-new_233,在线老游戏,new_10,309
-new_234,表情包,new_10,313
-new_235,地图,new_10,314
-new_236,短信接码平台,new_10,315
-new_237,各种生成器,new_10,316
-new_238,话术生成器,new_237,317
-new_239,字体生成器,new_237,318
-new_240,工具箱站,new_10,319
-new_241,临时邮箱／无限邮箱,new_10,320
-new_242,网址缩短,new_10,321
-new_243,国家标准／行业标准,new_10,322
-new_244,行业报告,new_10,323
-new_245,国家机构公开数据,new_244,324
-new_246,零售行业相关报告,new_244,325
-new_247,企业信息报告,new_244,326
-new_248,台词搜索,new_10,327
-new_249,查密码泄露,new_10,328
-new_250,榜单,new_10,329
-new_251,社交平台,new_250,330
-new_252,电竞排行榜,new_250,331
-new_253,短视频电商排行榜,new_250,332
-new_254,苹果APP应用排行榜,new_250,333
-new_255,收视率票房排行榜,new_250,334
-new_256,免费搜索外文文献,new_6,337
-new_257,外文文献原文数据库,new_6,338
-new_258,───────────,new_6,340
-new_259,智慧树／知到／超星／尔雅／学习通查答案,new_6,343
-new_260,语文,new_6,346
-new_261,数学,new_6,347
-new_262,英语,new_6,348
-new_263,物理,new_6,349
-new_264,化学,new_6,350
-new_265,生物,new_6,351
-new_266,政治,new_6,352
-new_267,历史,new_6,353
-new_268,地理,new_6,354
-new_269,知名高校课程共享,new_6,356
-new_270,钢琴谱,new_6,360
-new_271,爵士舞,new_6,362
-new_272,拉丁舞,new_6,363
-new_273,街舞,new_6,364
-new_274,古诗词／文言文,new_6,369
-new_275,实用导航,,370
-new_276,设计,new_275,371
-new_277,影视,new_275,372
-new_278,学术,new_275,373
-new_279,大数据,new_275,374
-new_280,自媒体,new_275,375
-new_281,好用的音效素材库,new_8,386
-new_282,音效一般不太会有版权问题，但搜什么关键词能找到自己想要的音效才是最让人头疼的问题,new_281,387
-new_283,免费在线一键抠图,new_8,391
-new_284,遴选,new_9,393
-new_285,事业单位,new_9,394
-new_286,面试,new_9,395
-new_287,三支一扶,new_9,396
-new_288,建造工程师,new_9,398
-new_289,造价工程师,new_9,399
-new_290,设备工程师,new_9,400
-new_291,安全工程师,new_9,401
-new_292,道路工程师,new_9,402
-new_293,电气工程师,new_9,403
-new_294,监理工程师,new_9,404
-new_295,信息安全工程师,new_9,405
-new_296,环境评价工程师,new_9,406
-new_297,咨询工程师,new_9,407
-new_298,结构工程师,new_9,408
-new_299,专升本／专接本／高起专／高升专,new_8,417
-new_300,其他课程,new_8,418
-new_301,更多免费PPT模板下载网站可见９－８栏,new_8,420
-new_302,电子书,new_8,421
-new_303,其他,new_8,422
-new_304,14栏的资源均采集自网络，具体网盘资源并不由我提供，失效不补,new_8,423
-new_305,如有网盘链接的资源侵犯了您的合法权益，请向网盘官方网站投诉！,new_8,424
+﻿id,name,parent,sort_order
+yingshidongmanzhibojilupian1,影视／动漫／直播／纪录片,,1
+wangyezonghezaixianxiazai2,网页 综合（在线／下载）,yingshidongmanzhibojilupian1,1
+wangyezonghejuhesousuo3,网页 综合（聚合搜索）,yingshidongmanzhibojilupian1,2
+wangyezonghejinxiazai4,网页 综合（仅下载）,yingshidongmanzhibojilupian1,3
+wangyejindianshijuzaixianxiaza5,网页 仅电视剧（在线／下载）,yingshidongmanzhibojilupian1,4
+wangyejindianshijujinxiazai6,网页 仅电视剧（仅下载）,yingshidongmanzhibojilupian1,5
+wangyedongmanzaixian7,网页 动漫（在线）,yingshidongmanzhibojilupian1,6
+wangyedongmanjinxiazai8,网页 动漫（仅下载）,yingshidongmanzhibojilupian1,7
+IPyingshizhibo9,ＴＶ ＶIP影视／直播,yingshidongmanzhibojilupian1,8
+TVbankeyongguanfangkehuduan10,TV版可用官方客户端,IPyingshizhibo9,1
+TVbanwangpankehuduan11,TV版网盘客户端,IPyingshizhibo9,2
+TVbanliulanqi12,TV版浏览器,IPyingshizhibo9,3
+diannaoIPyingshizhibo13,电脑 ＶIP影视／直播,yingshidongmanzhibojilupian1,9
+anzhuoIPyingshizhibo14,安卓 ＶIP影视／直播,yingshidongmanzhibojilupian1,10
+ISIPyingshi15,IＯS ＶIP影视,yingshidongmanzhibojilupian1,11
+tongyongtiyuzhiboluxiang16,通用 体育直播录像,yingshidongmanzhibojilupian1,12
+tongyongjilupian17,通用 纪录片,yingshidongmanzhibojilupian1,13
+guoneijidayingshiwangzhanzaixi18,国内几大影视网站（在线／下载）,tongyongjilupian17,1
+P2K4Kshengrouziyuan19,1080P／2K／4K／生肉资源,tongyongjilupian17,2
+shoujipingbanruanjian20,手机／平板软件,tongyongjilupian17,3
+chashifouyou4Kpianyuan21,查是否有4K片源,tongyongjilupian17,4
+wangyezhaozimu22,网页 找字幕,yingshidongmanzhibojilupian1,14
+dianzishumanhuayinyuetingshu23,电子书／漫画／音乐／听书,,2
+tongyongdianzishuxiaoshuoxiaza24,通用 电子书／小说下载,dianzishumanhuayinyuetingshu23,1
+juhesousuo25,聚合搜索,tongyongdianzishuxiaoshuoxiaza24,1
+youzhishuzhan26,优质书站,tongyongdianzishuxiaoshuoxiaza24,2
+wangluoxiaoshuo27,网络小说,tongyongdianzishuxiaoshuoxiaza24,3
+qingxiaoshuo28,轻小说,tongyongdianzishuxiaoshuoxiaza24,4
+zazhi29,杂志,tongyongdianzishuxiaoshuoxiaza24,5
+jiaocai30,教材,tongyongdianzishuxiaoshuoxiaza24,6
+zhuanyeleishuji31,专业类书籍,tongyongdianzishuxiaoshuoxiaza24,7
+guowaidianzishu32,国外电子书,tongyongdianzishuxiaoshuoxiaza24,8
+shuhuangzhaoshu33,书荒找书,tongyongdianzishuxiaoshuoxiaza24,9
+guji34,古籍,tongyongdianzishuxiaoshuoxiaza24,10
+gangtaidianzishu35,港台电子书,tongyongdianzishuxiaoshuoxiaza24,11
+shoujiyueduAPP36,手机 阅读APP,dianzishumanhuayinyuetingshu23,2
+wangyezaixianmanhua37,网页 在线漫画,dianzishumanhuayinyuetingshu23,3
+shoujimanhuaAPP38,手机 漫画APP,dianzishumanhuayinyuetingshu23,4
+tongyongbendimanhua39,通用 本地漫画,dianzishumanhuayinyuetingshu23,5
+wangyeVIPyinyuemianfeixiazaizh40,网页 VIP音乐免费下载站,dianzishumanhuayinyuetingshu23,6
+ruanjianVIPyinyuemianfeitingmi41,软件 VIP音乐免费听／免费下载,dianzishumanhuayinyuetingshu23,7
+wangyeyinyueziyuanfenxiangzhan42,网页 音乐资源分享站,dianzishumanhuayinyuetingshu23,8
+tongyongtingshuguangboFM43,通用 听书／广播FM,dianzishumanhuayinyuetingshu23,9
+BTciliziyuansousuo44,BT磁力资源搜索,,3
+guoneiBTcilisousuo45,国内BT磁力搜索🔎,BTciliziyuansousuo44,1
+guowaiBTcilisousuo46,国外BT磁力搜索🔎,BTciliziyuansousuo44,2
+cilizhuanzhongzi47,磁力转种子,BTciliziyuansousuo44,3
+mianfeiAIgongju48,免费AI工具,,4
+ChatGPT49,ChatGPT,mianfeiAIgongju48,1
+ChatGPTtishici50,ChatGPT提示词,ChatGPT49,1
+ChatGPTtidai51,ChatGPT替代,mianfeiAIgongju48,2
+AIsousuo52,AI 搜索,mianfeiAIgongju48,3
+AItupian53,AI 图片,mianfeiAIgongju48,4
+AIhuihuajiaocheng54,AI绘画教程,AItupian53,1
+AIhuihuamoxingxiazaizhan55,AI绘画模型下载站,AItupian53,2
+AIhuihuaguanjianci56,AI绘画关键词,AItupian53,3
+AIshipin57,AI 视频,mianfeiAIgongju48,5
+AIPPT58,AI PPT,mianfeiAIgongju48,6
+AIExcel59,AI Excel,mianfeiAIgongju48,7
+AIlunwen60,AI 论文,mianfeiAIgongju48,8
+AIxiezuo61,AI 写作,mianfeiAIgongju48,9
+AIbiancheng62,AI 编程,mianfeiAIgongju48,10
+AIzhishiku63,AI 知识库,mianfeiAIgongju48,11
+AIzhinengti64,AI 智能体,mianfeiAIgongju48,12
+AIjianmo65,AI 建模,mianfeiAIgongju48,13
+AIfalv66,AI 法律,mianfeiAIgongju48,14
+tehuifulijingxuan67,特惠福利精选🆕,,5
+diannaoshoujichangyong68,电脑手机常用,,6
+weixinxiangguan69,微信相关,diannaoshoujichangyong68,1
+liaotianjilu70,聊天记录,weixinxiangguan69,1
+gongzhonghaowenzhang71,公众号文章,weixinxiangguan69,2
+shipinhao72,视频号,weixinxiangguan69,3
+qitaneirong73,其他内容,weixinxiangguan69,4
+pengyouquan74,朋友圈,weixinxiangguan69,5
+haoyouqingli75,好友清理,weixinxiangguan69,6
+liulanqixiangguan76,浏览器相关,diannaoshoujichangyong68,2
+shoujiliulanqi77,手机浏览器,liulanqixiangguan76,1
+diannaoliulanqi78,电脑浏览器,liulanqixiangguan76,2
+mianfanqiangjiaobenxiazaizhan79,免翻墙脚本下载站,liulanqixiangguan76,3
+jiaobentuijian80,脚本推荐,liulanqixiangguan76,4
+mianfanqiangkuozhanxiazaizhan81,免翻墙扩展下载站,liulanqixiangguan76,5
+kuozhantuijian82,扩展推荐,liulanqixiangguan76,6
+bibei83,必备,kuozhantuijian82,1
+shipin84,视频,kuozhantuijian82,2
+tupian85,图片,kuozhantuijian82,3
+wangyebaocun86,网页保存,kuozhantuijian82,4
+AI87,AI,kuozhantuijian82,5
+piliangsousuotiwen88,批量搜索提问,liulanqixiangguan76,7
+xiazaixiangguan89,下载相关,diannaoshoujichangyong68,3
+ziyuanxiutanxiazai90,资源嗅探下载,xiazaixiangguan89,1
+BTciliziyuanxiazai91,BT磁力资源下载,xiazaixiangguan89,2
+lixianxiazaifuwu92,离线下载服务,xiazaixiangguan89,3
+wangpanziyuanxiazai93,网盘资源下载,xiazaixiangguan89,4
+gugebanAPPxiazai94,谷歌版APP下载,xiazaixiangguan89,5
+wendangziyuanxiazai95,文档资源下载,xiazaixiangguan89,6
+duanshipinxiazai96,短视频下载,xiazaixiangguan89,7
+Bilibilishipinxiazai97,Bilibili视频下载,xiazaixiangguan89,8
+YouTubeshipinxiazai98,YouTube视频下载,xiazaixiangguan89,9
+Instagramxiazai99,Instagram下载,xiazaixiangguan89,10
+wangkexiazai100,网课下载,xiazaixiangguan89,11
+zhiboluzhi101,直播录制,xiazaixiangguan89,12
+wendangxiangguan102,文档相关,diannaoshoujichangyong68,4
+WPS103,WPS,wendangxiangguan102,1
+dianzishuyueduqi104,电子书阅读器,wendangxiangguan102,2
+PDFyueduqi105,PDF阅读器,wendangxiangguan102,3
+PDFbianjiqi106,PDF编辑器,wendangxiangguan102,4
+PDFzhuanhuan107,PDF转换,wendangxiangguan102,5
+PDFqitaxiangguan108,PDF其他相关,wendangxiangguan102,6
+yinshipinxiangguan109,音视频相关,diannaoshoujichangyong68,5
+yinyuebofang110,音乐播放,yinshipinxiangguan109,1
+yinpinbianji111,音频编辑,yinshipinxiangguan109,2
+bendishipinbofang112,本地视频播放,yinshipinxiangguan109,3
+wangluoshipinbofang113,网络视频播放,yinshipinxiangguan109,4
+pingmuluzhi114,屏幕录制,yinshipinxiangguan109,5
+shipinjianji115,视频剪辑,yinshipinxiangguan109,6
+shipinqushuiyin116,视频去水印,yinshipinxiangguan109,7
+yinshipinzhuaiwenzi117,音视频转文字,yinshipinxiangguan109,8
+yinshipinzhuanma118,音视频转码,yinshipinxiangguan109,9
+wenzizhuanyinpin119,文字转音频,yinshipinxiangguan109,10
+shujuhuchuan120,数据互传,diannaoshoujichangyong68,6
+youxijiasuqi121,游戏加速器🔥,diannaoshoujichangyong68,7
+axudebijifangan122,阿虚的笔记方案,diannaoshoujichangyong68,8
+wenjiansousuowendangsousuo123,文件搜索／文档搜索,diannaoshoujichangyong68,9
+mimaguanliwenjianjiami124,密码管理／文件加密,diannaoshoujichangyong68,10
+RSSxiangguan125,RSS相关,diannaoshoujichangyong68,11
+fanyixiangguan126,翻译相关,diannaoshoujichangyong68,12
+shurufa127,输入法,diannaoshoujichangyong68,13
+jiamiyinpinshipinjiema128,加密音频／视频解码,diannaoshoujichangyong68,14
+bianshengqi129,变声器,diannaoshoujichangyong68,15
+shuake130,刷课,diannaoshoujichangyong68,16
+biji131,笔记,diannaoshoujichangyong68,17
+zidonghua132,自动化,diannaoshoujichangyong68,18
+kaoshixitong133,考试系统,diannaoshoujichangyong68,19
+diannaochangyong134,电脑常用,,7
+ruanjiandaquan135,软件大全,diannaochangyong134,1
+Winruanjianxiazaizhan136,Win软件下载站,ruanjiandaquan135,1
+Macruanjianxiazaizhan137,Mac软件下载站,ruanjiandaquan135,2
+wanrendianzandeMacruanjiantuij138,万人点赞的Mac软件推荐项目,Macruanjianxiazaizhan137,1
+zhengbanruanjiandazhequdao139,正版软件打折渠道,Macruanjianxiazaizhan137,2
+mianfeiMacpojieruanjianxiazaiz140,免费Mac破解软件下载站,Macruanjianxiazaizhan137,3
+Linuxruanjiantuijian141,Linux软件推荐,ruanjiandaquan135,3
+Adoberuanjian142,Adobe软件,diannaochangyong134,2
+yijiananzhuangban143,一键安装版,Adoberuanjian142,1
+PSzaixianban144,PS在线版,Adoberuanjian142,2
+PSdanwenjianban145,PS单文件版,Adoberuanjian142,3
+xitongxiangguan146,系统相关,diannaochangyong134,3
+xitongzhongzhuangPEgongju147,系统重装／PE工具,xitongxiangguan146,1
+xitongjingxiang148,系统镜像,xitongxiangguan146,2
+xitonghuanyuan149,系统还原,xitongxiangguan146,3
+xuniji150,虚拟机,xitongxiangguan146,4
+xitongqingli151,系统清理,xitongxiangguan146,5
+xitongyouhua152,系统优化,xitongxiangguan146,6
+shaduanquan153,杀毒／安全,xitongxiangguan146,7
+shujuhuifu154,数据恢复,xitongxiangguan146,8
+xitongxiufu155,系统修复,xitongxiangguan146,9
+qudongguanli156,驱动管理,xitongxiangguan146,10
+chuangkougongju157,窗口工具,xitongxiangguan146,11
+fanglanguanghuyan158,防蓝光护眼,xitongxiangguan146,12
+dianyuandianchiguanli159,电源电池管理,xitongxiangguan146,13
+yingjianxiangguan160,硬件相关,diannaochangyong134,4
+bijiben161,笔记本,yingjianxiangguan160,1
+taishijizhuangji162,台式机装机,yingjianxiangguan160,2
+zonghekepu163,综合科普,taishijizhuangji162,1
+CPU164,CPU,taishijizhuangji162,2
+zhuban165,主板,taishijizhuangji162,3
+xianka166,显卡,taishijizhuangji162,4
+yingpan167,硬盘,taishijizhuangji162,5
+gutaiyingpan168,固态硬盘,yingpan167,1
+jixieyingpan169,机械硬盘,yingpan167,2
+sanre170,散热,taishijizhuangji162,6
+dianyuan171,电源,taishijizhuangji162,7
+jixiang172,机箱,taishijizhuangji162,8
+xianshiqi173,显示器,taishijizhuangji162,9
+zhuangjipeizhituijian174,装机配置推荐,taishijizhuangji162,10
+zhuangjibuzhou175,装机步骤,taishijizhuangji162,11
+yingjianjiance176,硬件检测,taishijizhuangji162,12
+taishijizhengjigoumai177,台式机整机购买,yingjianxiangguan160,3
+erji178,耳机,yingjianxiangguan160,4
+jianpan179,键盘,yingjianxiangguan160,5
+shubiao180,鼠标,yingjianxiangguan160,6
+neicuntiao181,内存条,yingjianxiangguan160,7
+luyouqi182,路由器,yingjianxiangguan160,8
+wendangxiangguan183,文档相关,diannaochangyong134,5
+Office184,Office,wendangxiangguan183,1
+Officechajian185,Office插件,wendangxiangguan183,2
+wendangquzhongduibi186,文档去重对比,wendangxiangguan183,3
+wendangxiufu187,文档修复,wendangxiangguan183,4
+siweidaotu188,思维导图,wendangxiangguan183,5
+liuchengtu189,流程图,wendangxiangguan183,6
+CAJzhuanhuan190,CAJ转换,wendangxiangguan183,7
+wenxianguanli191,文献管理,wendangxiangguan183,8
+baiban192,白板,wendangxiangguan183,9
+tupianxiangguan193,图片相关,diannaochangyong134,6
+kantu194,看图,tupianxiangguan193,1
+jietu195,截图,tupianxiangguan193,2
+pintu196,拼图,tupianxiangguan193,3
+yasuofangda197,压缩／放大,tupianxiangguan193,4
+geshizhuanhuan198,格式转换,tupianxiangguan193,5
+tupianguanli199,图片管理,tupianxiangguan193,6
+OCRtupianwenzishibie200,OCR图片文字识别,tupianxiangguan193,7
+GIFdongtuluzhi201,GIF动图录制,tupianxiangguan193,8
+shejiaoliaotian202,社交聊天,diannaochangyong134,7
+jieyasuoxiangguan203,解压缩相关,diannaochangyong134,8
+anzhuomoniqi204,安卓模拟器,diannaochangyong134,9
+zhuomianzhengli205,桌面整理,diannaochangyong134,10
+chouqianchoujiang206,抽签抽奖,diannaochangyong134,11
+caiwuxiangguan207,财务相关,diannaochangyong134,12
+dazilianxi208,打字练习,diannaochangyong134,13
+jinxiaocunguanli209,进销存管理,diannaochangyong134,14
+paikexitong210,排课系统,diannaochangyong134,15
+CADxiangguanCASS211,CAD相关／CASS,diannaochangyong134,16
+shubiaodianlianqi212,鼠标点连器,diannaochangyong134,17
+shoujichangyong213,手机常用,,8
+shejiaoshequ214,社交／社区,shoujichangyong213,1
+gouwuzhifu215,购物／支付,shoujichangyong213,2
+xiaolvbangong216,效率／办公,shoujichangyong213,3
+qingdanfanqiezhong217,清单／番茄钟,xiaolvbangong216,1
+zhengjianzhao218,证件照,xiaolvbangong216,2
+wendangsaomiao219,文档扫描,xiaolvbangong216,3
+youxiang220,邮箱,xiaolvbangong216,4
+xuexijianshen221,学习／健身,shoujichangyong213,4
+yingyu222,英语,xuexijianshen221,1
+jiazhao223,驾照,xuexijianshen221,2
+jianshen224,健身,xuexijianshen221,3
+putonghua225,普通话,xuexijianshen221,4
+kechengbiao226,课程表,xuexijianshen221,5
+tupianxiangguan227,图片相关,shoujichangyong213,5
+koutu228,抠图,tupianxiangguan227,1
+Ptu229,P图,tupianxiangguan227,2
+wenjianguanlijieyasuo230,文件管理／解压缩,shoujichangyong213,6
+pingbiguanggaozidongtiaoguogua231,屏蔽广告／自动跳过广告,shoujichangyong213,7
+xinwen232,新闻,shoujichangyong213,8
+ditu233,地图,shoujichangyong213,9
+shenghuo234,生活,shoujichangyong213,10
+youxi235,游戏,shoujichangyong213,11
+anquanqingli236,安全／清理,shoujichangyong213,12
+rijijizhang237,日记／记账,shoujichangyong213,13
+xunidingweishuabu238,虚拟定位／刷步,shoujichangyong213,14
+yingyongduokaishoujifenshen239,应用多开／手机分身,shoujichangyong213,15
+pinpaianzhuozidaifenshengongne240,品牌安卓自带分身功能,yingyongduokaishoujifenshen239,1
+KgeKTV241,K歌／KTV,shoujichangyong213,16
+mianfeisouti242,免费搜题,shoujichangyong213,17
+yiliaojiankang243,医疗健康,shoujichangyong213,18
+IPAziyuaniOSziqian244,IPA资源／iOS自签,shoujichangyong213,19
+IPAziyuanxiazaizhan245,IPA资源下载站,IPAziyuaniOSziqian244,1
+zhengshuqianming246,证书签名,IPAziyuaniOSziqian244,2
+changyongwangzhan247,常用网站,,9
+juhewangpansousuo248,聚合网盘搜索,changyongwangzhan247,1
+danwangpansousuo249,单网盘搜索,changyongwangzhan247,2
+disanfanggugesousuo250,第三方谷歌搜索🔥,changyongwangzhan247,3
+shipinjiexixiazaizhan251,视频解析下载站,changyongwangzhan247,4
+youzhiruanjianxiazaizhan252,优质软件下载站,changyongwangzhan247,5
+zhitigonglvseruanjian253,只提供绿色软件,youzhiruanjianxiazaizhan252,1
+guowaipojieruanjianxiazaizhan254,国外破解软件下载站,changyongwangzhan247,6
+mianfeiPPTmuban255,免费PPT模板,changyongwangzhan247,7
+mianfei256,免费,mianfeiPPTmuban255,1
+banshoufeibanmianfei257,半收费半免费,mianfeiPPTmuban255,2
+guowaifufei258,国外付费,mianfeiPPTmuban255,3
+mianfeijianlimuban259,免费简历模板,changyongwangzhan247,8
+mianfeijianlimubanxiazai260,免费简历模板下载,mianfeijianlimuban259,1
+mianfeizaixianjianlizhizuo261,免费在线简历制作,mianfeijianlimuban259,2
+mianfeizaixianshejileijianlimu262,免费在线设计类简历模板,mianfeijianlimuban259,3
+huiyuanpinchehezu263,会员拼车合租🔥,changyongwangzhan247,9
+daogoubijiafanli264,导购／比价／返利,changyongwangzhan247,10
+daogou265,导购,daogoubijiafanli264,1
+fanliwangzhan266,返利网站,daogoubijiafanli264,2
+lishijiage267,历史价格,daogoubijiafanli264,3
+linshichuanwenjian268,临时传文件,changyongwangzhan247,11
+linshiwangpan269,临时网盘,linshichuanwenjian268,1
+zhilianhuchuan270,直连互传,linshichuanwenjian268,2
+zaixianyitusoutu271,在线以图搜图,changyongwangzhan247,12
+pojieyouxixiazai272,破解游戏下载,changyongwangzhan247,13
+zaixianlaoyouxi273,在线老游戏,changyongwangzhan247,14
+yunyouxi274,云游戏,changyongwangzhan247,15
+bizhi275,壁纸,changyongwangzhan247,16
+lengmenwangzhan276,冷门网站,,10
+biaoqingbao277,表情包,lengmenwangzhan276,1
+ditu278,地图,lengmenwangzhan276,2
+duanxinjiemapingtai279,短信接码平台,lengmenwangzhan276,3
+gezhongshengchengqi280,各种生成器,lengmenwangzhan276,4
+huashushengchengqi281,话术生成器,gezhongshengchengqi280,1
+zitishengchengqi282,字体生成器,gezhongshengchengqi280,2
+gongjuxiangzhan283,工具箱站,lengmenwangzhan276,5
+linshiyouxiangwuxianyouxiang284,临时邮箱／无限邮箱,lengmenwangzhan276,6
+wangzhisuoduan285,网址缩短,lengmenwangzhan276,7
+guojiabiaozhunhangyebiaozhun286,国家标准／行业标准,lengmenwangzhan276,8
+hangyebaogao287,行业报告,lengmenwangzhan276,9
+guojiajigougongkaishuju288,国家机构公开数据,hangyebaogao287,1
+lingshouhangyexiangguanbaogao289,零售行业相关报告,hangyebaogao287,2
+qiyexinxibaogao290,企业信息报告,hangyebaogao287,3
+taicisousuo291,台词搜索,lengmenwangzhan276,10
+chamimaxielou292,查密码泄露,lengmenwangzhan276,11
+bangdan293,榜单,lengmenwangzhan276,12
+shejiaopingtai294,社交平台,bangdan293,1
+dianjingpaihangbang295,电竞排行榜,bangdan293,2
+duanshipindianshangpaihangbang296,短视频电商排行榜,bangdan293,3
+pingguoAPPyingyongpaihangbang297,苹果APP应用排行榜,bangdan293,4
+shoushilvpiaofangpaihangbang298,收视率票房排行榜,bangdan293,5
+zhibopingtaipaibangbang299,直播平台排榜榜,bangdan293,6
+xuexiwangzhan300,学习网站,,11
+zhongwaiwenxianxiazai301,中外文献下载,xuexiwangzhan300,1
+mianfeisousuowaiwenwenxian302,免费搜索外文文献,zhongwaiwenxianxiazai301,1
+waiwenwenxianyuanwenshujuku303,外文文献原文数据库,zhongwaiwenxianxiazai301,2
+zaixianzidian304,在线字典,xuexiwangzhan300,2
+xiezuojiaodui305,写作校对,xuexiwangzhan300,3
+mianfeisouti306,免费搜题,xuexiwangzhan300,4
+zhihuishuzhidaochaoxingeryaxue307,智慧树／知到／超星／尔雅／学习通查答案,mianfeisouti306,1
+youershaoerjiaoyu308,幼儿少儿教育,xuexiwangzhan300,5
+zhongxiaoxuekecheng309,中小学课程,xuexiwangzhan300,6
+yuwen310,语文,zhongxiaoxuekecheng309,1
+shuxue311,数学,zhongxiaoxuekecheng309,2
+yingyu312,英语,zhongxiaoxuekecheng309,3
+wuli313,物理,zhongxiaoxuekecheng309,4
+huaxue314,化学,zhongxiaoxuekecheng309,5
+shengwu315,生物,zhongxiaoxuekecheng309,6
+zhengzhi316,政治,zhongxiaoxuekecheng309,7
+lishi317,历史,zhongxiaoxuekecheng309,8
+dili318,地理,zhongxiaoxuekecheng309,9
+daxuekecheng319,大学课程,xuexiwangzhan300,7
+zhiminggaoxiaokechenggongxiang320,知名高校课程共享,daxuekecheng319,1
+gonggongtikulinianzhenti321,公共题库／历年真题,xuexiwangzhan300,8
+mianfeikejianjiaoan322,免费课件／教案,xuexiwangzhan300,9
+xuechanggexueyinyue323,学唱歌／学音乐,xuexiwangzhan300,10
+gangqinpu324,钢琴谱,xuechanggexueyinyue323,1
+xuewudao325,学舞蹈,xuexiwangzhan300,11
+jueshiwu326,爵士舞,xuewudao325,1
+ladingwu327,拉丁舞,xuewudao325,2
+jiewu328,街舞,xuewudao325,3
+xuefangyan329,学方言,xuexiwangzhan300,12
+xuezuocai330,学做菜,xuexiwangzhan300,13
+xuebiancheng331,学编程,xuexiwangzhan300,14
+xueruanjian332,学软件,xuexiwangzhan300,15
+gushiciwenyanwen333,古诗词／文言文,xuexiwangzhan300,16
+shiyongdaohang334,实用导航,,12
+sheji335,设计,shiyongdaohang334,1
+yingshi336,影视,shiyongdaohang334,2
+xueshu337,学术,shiyongdaohang334,3
+dashuju338,大数据,shiyongdaohang334,4
+zimeiti339,自媒体,shiyongdaohang334,5
+shejiyingshihouqi340,设计／影视后期,,13
+AEmubanPRmuban341,AE模板／PR模板,shejiyingshihouqi340,1
+PSchajianPRchajianAEchajian342,PS插件／PR插件／AE插件,shejiyingshihouqi340,2
+mianfeiPSDmuban343,免费PSD模板,shejiyingshihouqi340,3
+mianfeikeshangyongtupian344,免费可商用图片,shejiyingshihouqi340,4
+mianfeikeshangyongtubiao345,免费可商用图标,shejiyingshihouqi340,5
+mianfeikeshangyong3Dsucai346,免费可商用3D素材,shejiyingshihouqi340,6
+mianfeikeshangyongziti347,免费可商用字体,shejiyingshihouqi340,7
+mianfeikeshangyongshipinsucai348,免费可商用视频素材,shejiyingshihouqi340,8
+mianfeikeshangyongBGMbeijingyi349,免费可商用BGM背景音乐,shejiyingshihouqi340,9
+haoyongdeyinxiaosucaiku350,好用的音效素材库,shejiyingshihouqi340,10
+jianbianpeise351,渐变／配色,shejiyingshihouqi340,11
+Logosheji352,Logo设计,shejiyingshihouqi340,12
+gezhongfenggetupianzaixianhuiz353,各种风格图片在线绘制／生成,shejiyingshihouqi340,13
+mianfeizaixianyijiankoutu354,免费在线一键抠图,shejiyingshihouqi340,14
+kaozhengkaojidengziyuan355,考证／考级等资源,,14
+gongwuyuan356,公务员,kaozhengkaojidengziyuan355,1
+linxuan357,遴选,gongwuyuan356,1
+shiyedanwei358,事业单位,gongwuyuan356,2
+mianshi359,面试,gongwuyuan356,3
+sanzhiyifu360,三支一扶,gongwuyuan356,4
+gongchengshi361,工程师,kaozhengkaojidengziyuan355,2
+jianzaogongchengshi362,建造工程师,gongchengshi361,1
+zaojiagongchengshi363,造价工程师,gongchengshi361,2
+shebeigongchengshi364,设备工程师,gongchengshi361,3
+anquangongchengshi365,安全工程师,gongchengshi361,4
+daolugongchengshi366,道路工程师,gongchengshi361,5
+dianqigongchengshi367,电气工程师,gongchengshi361,6
+jianligongchengshi368,监理工程师,gongchengshi361,7
+xinxianquangongchengshi369,信息安全工程师,gongchengshi361,8
+huanjingpingjiagongchengshi370,环境评价工程师,gongchengshi361,9
+zixungongchengshi371,咨询工程师,gongchengshi361,10
+jiegougongchengshi372,结构工程师,gongchengshi361,11
+kuaijishijingjishishuiwushi373,会计师／经济师／税务师,kaozhengkaojidengziyuan355,3
+jiaoshizigezhengjiaoshizhaopin374,教师资格证／教师招聘,kaozhengkaojidengziyuan355,4
+kaoyan375,考研,kaozhengkaojidengziyuan355,5
+yingyusiliuji376,英语四六级,kaozhengkaojidengziyuan355,6
+yingyuzhuansizhuanba377,英语专四专八,kaozhengkaojidengziyuan355,7
+jisuanji378,计算机,kaozhengkaojidengziyuan355,8
+sifakaoshifashuo379,司法考试／法硕,kaozhengkaojidengziyuan355,9
+junduiwenzhi380,军队文职,kaozhengkaojidengziyuan355,10
+zhuanshengbenzhuanjiebengaoqiz381,专升本／专接本／高起专／高升专,kaozhengkaojidengziyuan355,11
+qitakecheng382,其他课程,kaozhengkaojidengziyuan355,12
+PPTmuban383,PPT模板,kaozhengkaojidengziyuan355,13
+dianzishu384,电子书,kaozhengkaojidengziyuan355,14
+qita385,其他,kaozhengkaojidengziyuan355,15

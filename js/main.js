@@ -12,9 +12,41 @@ let navigationHistory = [];
 let currentNodeId = 'root';
 
 /**
+ * 图片懒加载观察器
+ * @type {IntersectionObserver}
+ */
+let imageObserver;
+
+/**
+ * 初始化图片懒加载
+ */
+function initImageLazyLoading() {
+    if ('IntersectionObserver' in window) {
+        imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.dataset.src;
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, {
+            rootMargin: '50px'
+        });
+    }
+}
+
+/**
  * DOM内容加载完成后初始化应用
  */
 document.addEventListener('DOMContentLoaded', async function() {
+    // 初始化图片懒加载
+    initImageLazyLoading();
+    
     // 初始化树形渲染器
     window.treeRenderer = new TreeRenderer('folderTree', dataManager);
 
@@ -39,13 +71,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         createSampleData();
     }
 
-    // 绑定搜索功能
+    // 绑定搜索功能（添加防抖）
     document.getElementById('searchBtn').addEventListener('click', handleSearch);
     document.getElementById('searchInput').addEventListener('keypress', async function(e) {
         if (e.key === 'Enter') {
             await handleSearch();
         }
     });
+    
+    // 实时搜索功能（可选）
+    document.getElementById('searchInput').addEventListener('input', debounce(async function(e) {
+        const keyword = e.target.value.trim();
+        if (keyword.length >= 2) {
+            await handleSearch();
+        }
+    }, 500));
 
     // 监听节点选中事件
     document.addEventListener('nodeSelected', async function(e) {
@@ -100,6 +140,21 @@ document.addEventListener('DOMContentLoaded', async function() {
  * @param {string} nodeId - 节点ID
  */
 async function renderContent(nodeId) {
+    // 防抖处理，避免频繁渲染
+    if (renderContent.timeout) {
+        clearTimeout(renderContent.timeout);
+    }
+    
+    renderContent.timeout = setTimeout(async () => {
+        await performRenderContent(nodeId);
+    }, 50);
+}
+
+/**
+ * 执行内容渲染
+ * @param {string} nodeId - 节点ID
+ */
+async function performRenderContent(nodeId) {
     // 更新当前节点ID
     currentNodeId = nodeId;
 
@@ -118,8 +173,9 @@ async function renderContent(nodeId) {
     const itemsContainer = document.getElementById('itemsContainer');
     const breadcrumb = document.getElementById('breadcrumb');
 
-    // 清空内容
-    itemsContainer.innerHTML = '';
+    // 使用 DocumentFragment 优化DOM操作
+    const fragment = document.createDocumentFragment();
+    
     // 保留返回按钮
     const backButton = breadcrumb.querySelector('.back-button');
     breadcrumb.innerHTML = '';
@@ -136,9 +192,11 @@ async function renderContent(nodeId) {
     renderBreadcrumb(nodeId);
 
     // 检查是否需要加载站点数据
-    // 如果当前节点不是根节点，且不是分类节点，则需要加载站点数据
     if (nodeId !== 'root' && node.type === 'folder') {
         try {
+            // 显示加载状态
+            itemsContainer.innerHTML = '<p>正在加载数据...</p>';
+            
             // 按需加载站点数据
             await dataManager.getFullData();
             console.log('已按需加载站点数据');
@@ -152,104 +210,97 @@ async function renderContent(nodeId) {
     // 获取子项
     const children = dataManager.getChildren(nodeId);
 
-    // 渲染子项
-    if (!children || children.length === 0) {
-        // 已移除"暂无内容"提示
-        return;
+    // 清空容器
+    itemsContainer.innerHTML = '';
+
+    // 渲染子项（批量操作）
+    if (children && children.length > 0) {
+        const batchSize = 20; // 批次大小
+        let currentBatch = 0;
+        
+        const renderBatch = () => {
+            const start = currentBatch * batchSize;
+            const end = Math.min(start + batchSize, children.length);
+            
+            for (let i = start; i < end; i++) {
+                const row = createItemRow(children[i], i);
+                fragment.appendChild(row);
+            }
+            
+            // 批量添加到DOM
+            itemsContainer.appendChild(fragment);
+            
+            currentBatch++;
+            
+            // 如果还有更多项目，使用 requestAnimationFrame 继续渲染
+            if (end < children.length) {
+                requestAnimationFrame(renderBatch);
+            } else {
+                // 渲染完成，应用黑暗模式类
+                updateDarkModeClasses();
+            }
+        };
+        
+        renderBatch();
+    } else {
+        // 应用黑暗模式类
+        updateDarkModeClasses();
     }
-    children.forEach((item, index) => {
-        const row = createItemRow(item, index);
-        itemsContainer.appendChild(row);
-    });
-    
-    // 应用黑暗模式类
-    updateDarkModeClasses();
 }
 
 /**
- * 创建项目行元素
+ * 创建项目行元素 - 优化版本
  * @param {Object} item - 项目数据
  * @param {number} index - 索引
  * @returns {HTMLElement} 项目行元素
  */
 function createItemRow(item, index) {
+    // 使用模板字符串和innerHTML一次性创建DOM结构
     const row = document.createElement('div');
     row.className = `item-row ${item.type}`;
-    
-    // 添加延迟动画效果
     row.style.animationDelay = `${index * 0.05}s`;
     
-    const icon = document.createElement('div');
-    icon.className = 'item-icon';
-    
-    // 根据是否有图标URL来决定显示什么图标
+    // 预处理图标逻辑 - 支持懒加载
+    let iconContent = '';
     if (item.icon) {
-        // 如果有图标URL，则显示网站图标
-        const img = document.createElement('img');
-        img.src = item.icon;
-        img.alt = item.name;
-        img.className = 'item-favicon';
-        img.onerror = function() {
-            // 如果图标加载失败，显示默认emoji图标
-            icon.textContent = item.type === 'folder' ? '📁' : '🔗';
-        };
-        icon.appendChild(img);
+        iconContent = `<img data-src="${item.icon}" alt="${item.name}" class="item-favicon lazy-load" onerror="this.style.display='none'; this.parentNode.textContent='${item.type === 'folder' ? '📁' : '🔗'}';">`;
     } else if (item.type === 'folder') {
-        icon.textContent = '📁';
-    } else {
-        // 对于链接类型，尝试使用网站的favicon.ico
-        if (item.url) {
-            try {
-                const urlObj = new URL(item.url);
-                const faviconUrl = urlObj.origin + '/favicon.ico';
-                const img = document.createElement('img');
-                img.src = faviconUrl;
-                img.alt = item.name;
-                img.className = 'item-favicon';
-                img.onerror = function() {
-                    // 如果favicon.ico也加载失败，显示默认emoji图标
-                    icon.textContent = '🔗';
-                };
-                icon.appendChild(img);
-            } catch (e) {
-                // URL无效时显示默认emoji图标
-                icon.textContent = '🔗';
-            }
-        } else {
-            icon.textContent = '🔗';
+        iconContent = '📁';
+    } else if (item.url) {
+        try {
+            const urlObj = new URL(item.url);
+            const faviconUrl = urlObj.origin + '/favicon.ico';
+            iconContent = `<img data-src="${faviconUrl}" alt="${item.name}" class="item-favicon lazy-load" onerror="this.style.display='none'; this.parentNode.textContent='🔗';">`;
+        } catch (e) {
+            iconContent = '🔗';
         }
+    } else {
+        iconContent = '🔗';
     }
     
-    const info = document.createElement('div');
-    info.className = 'item-info';
+    // 构建完整的HTML结构
+    row.innerHTML = `
+        <div class="item-icon">${iconContent}</div>
+        <div class="item-info">
+            <div class="item-title-container">
+                <span class="item-title">${item.name}</span>
+                ${item.description ? `<span class="item-description">${item.description}</span>` : ''}
+            </div>
+            ${item.url ? `<div class="item-url">${item.url}</div>` : ''}
+        </div>
+    `;
     
-    const titleContainer = document.createElement('div');
-    titleContainer.className = 'item-title-container';
-    
-    const title = document.createElement('span');
-    title.className = 'item-title';
-    title.textContent = item.name;
-    
-    titleContainer.appendChild(title);
-    
-    if (item.description) {
-        const description = document.createElement('span');
-        description.className = 'item-description';
-        description.textContent = item.description;
-        titleContainer.appendChild(description);
-    }
-    
-    info.appendChild(titleContainer);
-    
-    if (item.url) {
-        const url = document.createElement('div');
-        url.className = 'item-url';
-        url.textContent = item.url;
-        info.appendChild(url);
-    }
-    
-    row.appendChild(icon);
-    row.appendChild(info);
+    // 设置懒加载
+    const lazyImages = row.querySelectorAll('.lazy-load');
+    lazyImages.forEach(img => {
+        if (imageObserver && img.dataset.src) {
+            imageObserver.observe(img);
+        } else {
+            // 降级处理：如果不支持 IntersectionObserver，直接加载图片
+            img.src = img.dataset.src;
+            img.removeAttribute('data-src');
+        }
+    });
     
     // 添加点击事件
     row.addEventListener('click', async () => {
@@ -264,6 +315,24 @@ function createItemRow(item, index) {
     });
     
     return row;
+}
+
+/**
+ * 防抖函数
+ * @param {Function} func - 要执行的函数
+ * @param {number} wait - 等待时间（毫秒）
+ * @returns {Function} 防抖后的函数
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
 
 /**
@@ -305,22 +374,42 @@ function renderBreadcrumb(nodeId) {
 }
 
 /**
- * 处理搜索
+ * 处理搜索 - 优化版本
  */
 async function handleSearch() {
     const keyword = document.getElementById('searchInput').value.trim();
     if (!keyword) return;
 
-    // 显示加载状态
+    // 防抖处理
+    if (handleSearch.timeout) {
+        clearTimeout(handleSearch.timeout);
+    }
+    
+    handleSearch.timeout = setTimeout(async () => {
+        await performSearch(keyword);
+    }, 300);
+}
+
+/**
+ * 执行搜索
+ * @param {string} keyword - 搜索关键词
+ */
+async function performSearch(keyword) {
     const itemsContainer = document.getElementById('itemsContainer');
-    itemsContainer.innerHTML = `<h2>搜索中: "${keyword}"</h2><p>正在加载搜索功能...</p>`;
+    
+    // 显示加载状态
+    itemsContainer.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <h2>搜索中: "${keyword}"</h2>
+            <p>正在搜索匹配结果...</p>
+        </div>
+    `;
 
     try {
         const results = await dataManager.search(keyword);
 
-        // 保留返回按钮
-        const backButton = document.getElementById('backButton');
-        itemsContainer.innerHTML = `<h2>搜索结果: "${keyword}"</h2>`;
+        // 清空容器并显示搜索结果标题
+        itemsContainer.innerHTML = `<h2>搜索结果: "${keyword}" (${results.length}条)</h2>`;
 
         if (results.length === 0) {
             itemsContainer.innerHTML += '<p>未找到匹配的结果，请尝试其他关键词。</p>';
@@ -328,16 +417,41 @@ async function handleSearch() {
             return;
         }
 
-        results.forEach((item, index) => {
-            const row = createSearchResultRow(item, keyword, index);
-            itemsContainer.appendChild(row);
-        });
+        // 使用DocumentFragment优化DOM操作
+        const fragment = document.createDocumentFragment();
+        const batchSize = 15; // 搜索结果批次大小
+        let currentBatch = 0;
+        
+        const renderSearchBatch = () => {
+            const start = currentBatch * batchSize;
+            const end = Math.min(start + batchSize, results.length);
+            
+            for (let i = start; i < end; i++) {
+                const row = createSearchResultRow(results[i], keyword, i);
+                fragment.appendChild(row);
+            }
+            
+            itemsContainer.appendChild(fragment);
+            
+            currentBatch++;
+            
+            if (end < results.length) {
+                requestAnimationFrame(renderSearchBatch);
+            } else {
+                updateDarkModeClasses();
+            }
+        };
+        
+        renderSearchBatch();
 
-        // 应用黑暗模式类
-        updateDarkModeClasses();
     } catch (error) {
         console.error('搜索失败:', error);
-        itemsContainer.innerHTML = `<h2>搜索失败</h2><p>搜索功能暂时不可用，请稍后重试。</p>`;
+        itemsContainer.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <h2>搜索失败</h2>
+                <p>搜索功能暂时不可用，请稍后重试。</p>
+            </div>
+        `;
     }
 }
 

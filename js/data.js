@@ -10,14 +10,23 @@ class DataManager {
         /** @type {Object} 树形结构数据 */
         this.treeData = {};
         
-        /** @type {Object} 节点映射表 */
-        this.nodeMap = {};
+        /** @type {Map} 节点映射表 - 使用Map提升查找性能 */
+        this.nodeMap = new Map();
         
         /** @type {Array<Object>} 分类数据 */
         this.categories = [];
         
         /** @type {Array<Object>} 网站链接数据 */
         this.sites = [];
+        
+        /** @type {Map} 搜索缓存 - 缓存搜索结果 */
+        this.searchCache = new Map();
+        
+        /** @type {number} 缓存最大数量 */
+        this.cacheMaxSize = 50;
+        
+        /** @type {boolean} 数据是否已加载 */
+        this.isDataLoaded = false;
     }
 
     /**
@@ -112,9 +121,14 @@ class DataManager {
      * @returns {Array<Object>} 构建后的数据数组
      */
     buildDataFromCategoriesAndSites() {
-        const categoryMap = {};
-        this.categories.forEach(cat => {
-            categoryMap[cat.id] = {
+        // 预分配数组大小以提升性能
+        const data = new Array(this.categories.length + this.sites.length);
+        let index = 0;
+        
+        // 使用 for 循环替代 forEach 提升性能
+        for (let i = 0; i < this.categories.length; i++) {
+            const cat = this.categories[i];
+            data[index++] = {
                 id: cat.id,
                 parent_id: cat.parent || '',
                 name: cat.name,
@@ -124,8 +138,11 @@ class DataManager {
                 description: '',
                 sort_order: cat.sort_order ? parseInt(cat.sort_order) : 9999
             };
-        });
-        const siteList = this.sites.map(site => {
+        }
+        
+        // 优化站点数据处理
+        for (let i = 0; i < this.sites.length; i++) {
+            const site = this.sites[i];
             let icon = '';
             if (site.icon) {
                 icon = site.icon;
@@ -137,7 +154,7 @@ class DataManager {
                     // URL无效时保持icon为空
                 }
             }
-            return {
+            data[index++] = {
                 id: site.id,
                 parent_id: site.category,
                 name: site.title,
@@ -147,59 +164,63 @@ class DataManager {
                 description: site.description,
                 sort_order: site.sort_order ? parseInt(site.sort_order) : 9999
             };
-        });
-        return [
-            ...Object.values(categoryMap),
-            ...siteList
-        ];
+        }
+        
+        return data;
     }
 
     /**
      * 构建树形结构
      */
     buildTree() {
-        this.nodeMap = {};
-        this.data.forEach(item => {
-            // 只为有子节点的节点创建children数组
-            if (item.parent_id || item.type === 'folder') {
-                this.nodeMap[item.id] = { ...item, children: [] };
-            } else {
-                this.nodeMap[item.id] = { ...item };
+        // 使用 Map 替代普通对象提升查找性能
+        this.nodeMap = new Map();
+        
+        // 单次遍历构建节点映射
+        for (let i = 0; i < this.data.length; i++) {
+            const item = this.data[i];
+            this.nodeMap.set(item.id, { ...item, children: [] });
+        }
+        
+        // 构建父子关系
+        for (let i = 0; i < this.data.length; i++) {
+            const item = this.data[i];
+            if (item.parent_id) {
+                const parent = this.nodeMap.get(item.parent_id);
+                if (parent) {
+                    parent.children.push(this.nodeMap.get(item.id));
+                }
             }
-        });
-        this.data.forEach(item => {
-            if (item.parent_id && this.nodeMap[item.parent_id]) {
-                this.nodeMap[item.parent_id].children.push(this.nodeMap[item.id]);
-            }
-        });
-        Object.values(this.nodeMap).forEach(node => {
+        }
+        
+        // 优化排序 - 使用更高效的排序算法
+        for (const node of this.nodeMap.values()) {
             if (node.children && node.children.length > 0) {
-                // 先按类型排序：文件夹在前，链接在后
+                // 使用原地排序避免创建新数组
                 node.children.sort((a, b) => {
-                    // 如果a是文件夹，b是链接，则a在前
-                    if (a.type === 'folder' && b.type === 'link') {
-                        return -1;
-                    }
-                    // 如果a是链接，b是文件夹，则b在前
-                    if (a.type === 'link' && b.type === 'folder') {
-                        return 1;
-                    }
-                    // 同类型则按sort_order排序
-                    return a.sort_order - b.sort_order;
+                    // 类型排序：文件夹在前
+                    const typeCompare = (a.type === 'folder' ? 0 : 1) - (b.type === 'folder' ? 0 : 1);
+                    return typeCompare !== 0 ? typeCompare : a.sort_order - b.sort_order;
                 });
             }
-        });
+        }
+        
+        // 构建根节点
         this.treeData = {
             id: 'root',
             name: '所有书签',
             type: 'folder',
             children: []
         };
-        this.data.forEach(item => {
+        
+        // 收集根级节点
+        for (let i = 0; i < this.data.length; i++) {
+            const item = this.data[i];
             if ((!item.parent_id || item.parent_id === '') && item.type === 'folder') {
-                this.treeData.children.push(this.nodeMap[item.id]);
+                this.treeData.children.push(this.nodeMap.get(item.id));
             }
-        });
+        }
+        
         this.treeData.children.sort((a, b) => a.sort_order - b.sort_order);
     }
 
@@ -225,7 +246,7 @@ class DataManager {
         if (id === 'root') {
             return this.treeData;
         }
-        return this.nodeMap[id] || null;
+        return this.nodeMap.get(id) || null;
     }
 
     /**
@@ -282,12 +303,21 @@ class DataManager {
     }
 
     /**
-     * 搜索功能
+     * 搜索功能 - 带缓存优化
      * @param {string} keyword - 搜索关键词
      * @returns {Promise<Array<Object>>} 搜索结果数组
      */
     async search(keyword) {
         if (!keyword) return [];
+        
+        // 规范化关键词
+        const normalizedKeyword = keyword.toLowerCase().trim();
+        
+        // 检查缓存
+        if (this.searchCache.has(normalizedKeyword)) {
+            console.log('从缓存返回搜索结果');
+            return this.searchCache.get(normalizedKeyword);
+        }
         
         // 按需加载pinyin-pro库
         let pinyinPro;
@@ -295,27 +325,40 @@ class DataManager {
             pinyinPro = await this.loadPinyinPro();
         } catch (error) {
             console.error('pinyin-pro库加载失败，使用普通搜索:', error);
-            // 如果库加载失败，使用普通搜索（仅匹配原始文本）
-            return this.simpleSearch(keyword);
+            const results = this.simpleSearch(normalizedKeyword);
+            this.cacheSearchResult(normalizedKeyword, results);
+            return results;
         }
         
-        keyword = keyword.toLowerCase().trim();
         const results = [];
-        const pinyinKeyword = pinyinPro.pinyin(keyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
+        const pinyinKeyword = pinyinPro.pinyin(normalizedKeyword, { toneType: 'none', type: 'array' }).join('').toLowerCase();
+        
+        // 使用迭代代替递归，避免栈溢出
         const stack = [...this.treeData.children];
         while (stack.length > 0) {
             const node = stack.pop();
-            const nameMatch = node.name &&
-                (node.name.toLowerCase().includes(keyword) ||
-                 pinyinPro.pinyin(node.name, { toneType: 'none' }).toLowerCase().includes(keyword) ||
-                 pinyinPro.pinyin(node.name, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword));
-            const descriptionMatch = node.description &&
-                (node.description.toLowerCase().includes(keyword) ||
-                 pinyinPro.pinyin(node.description, { toneType: 'none' }).toLowerCase().includes(keyword) ||
-                 pinyinPro.pinyin(node.description, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword));
-            const urlMatch = node.url &&
-                (node.url.toLowerCase().includes(keyword) ||
-                 node.url.toLowerCase().includes(pinyinKeyword));
+            
+            // 优化匹配逻辑
+            let nameMatch = false, descriptionMatch = false, urlMatch = false;
+            
+            if (node.name) {
+                const name = node.name.toLowerCase();
+                nameMatch = name.includes(normalizedKeyword) ||
+                    pinyinPro.pinyin(node.name, { toneType: 'none' }).toLowerCase().includes(normalizedKeyword) ||
+                    pinyinPro.pinyin(node.name, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword);
+            }
+            
+            if (node.description) {
+                const desc = node.description.toLowerCase();
+                descriptionMatch = desc.includes(normalizedKeyword) ||
+                    pinyinPro.pinyin(node.description, { toneType: 'none' }).toLowerCase().includes(normalizedKeyword) ||
+                    pinyinPro.pinyin(node.description, { toneType: 'none', type: 'array' }).join('').toLowerCase().includes(pinyinKeyword);
+            }
+            
+            if (node.url) {
+                urlMatch = node.url.toLowerCase().includes(normalizedKeyword);
+            }
+            
             if (nameMatch || descriptionMatch || urlMatch) {
                 const result = { ...node };
                 if (nameMatch) result.nameMatch = true;
@@ -323,11 +366,39 @@ class DataManager {
                 if (urlMatch) result.urlMatch = true;
                 results.push(result);
             }
+            
+            // 添加子节点到栈中
             if (node.children && node.children.length > 0) {
                 stack.push(...node.children);
             }
         }
+        
+        // 缓存搜索结果
+        this.cacheSearchResult(normalizedKeyword, results);
+        
         return results;
+    }
+
+    /**
+     * 缓存搜索结果
+     * @param {string} keyword - 关键词
+     * @param {Array} results - 搜索结果
+     */
+    cacheSearchResult(keyword, results) {
+        // 如果缓存已满，删除最老的缓存项
+        if (this.searchCache.size >= this.cacheMaxSize) {
+            const firstKey = this.searchCache.keys().next().value;
+            this.searchCache.delete(firstKey);
+        }
+        
+        this.searchCache.set(keyword, results);
+    }
+
+    /**
+     * 清空搜索缓存
+     */
+    clearSearchCache() {
+        this.searchCache.clear();
     }
 
     /**

@@ -93,6 +93,22 @@ document.addEventListener('DOMContentLoaded', async function() {
         await renderContent(nodeId);
     });
 
+    // 监听站点数据预加载完成事件
+    window.addEventListener('sitesPreloaded', function(e) {
+        console.log('站点数据预加载完成，共', e.detail.sitesCount, '个站点');
+        
+        // 如果当前正在显示某个分类，刷新显示内容
+        if (currentNodeId !== 'root') {
+            const node = dataManager.getNodeById(currentNodeId);
+            if (node && node.type === 'folder') {
+                // 异步刷新当前内容，不阻塞用户操作
+                setTimeout(() => {
+                    renderContent(currentNodeId);
+                }, 100);
+            }
+        }
+    });
+
     // 黑暗模式切换
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     
@@ -191,61 +207,80 @@ async function performRenderContent(nodeId) {
     // 渲染面包屑
     renderBreadcrumb(nodeId);
 
-    // 检查是否需要加载站点数据
-    if (nodeId !== 'root' && node.type === 'folder') {
+    // 获取子项
+    const children = dataManager.getChildren(nodeId);
+
+    // 如果没有子项且是文件夹类型，尝试获取完整数据
+    if ((!children || children.length === 0) && node.type === 'folder' && nodeId !== 'root') {
         try {
             // 显示加载状态
             itemsContainer.innerHTML = '<p>正在加载数据...</p>';
             
-            // 按需加载站点数据
+            // 获取完整数据（如果站点数据还未加载会等待加载）
             await dataManager.getFullData();
-            console.log('已按需加载站点数据');
+            console.log('已获取完整数据');
+            
+            // 重新获取子项
+            const updatedChildren = dataManager.getChildren(nodeId);
+            if (updatedChildren && updatedChildren.length > 0) {
+                renderItems(updatedChildren, itemsContainer);
+            } else {
+                itemsContainer.innerHTML = '<p>该分类下暂无内容。</p>';
+            }
         } catch (error) {
-            console.error('站点数据加载失败:', error);
-            itemsContainer.innerHTML = '<p>站点数据加载失败，请稍后重试。</p>';
+            console.error('数据加载失败:', error);
+            itemsContainer.innerHTML = '<p>数据加载失败，请稍后重试。</p>';
             return;
         }
-    }
-
-    // 获取子项
-    const children = dataManager.getChildren(nodeId);
-
-    // 清空容器
-    itemsContainer.innerHTML = '';
-
-    // 渲染子项（批量操作）
-    if (children && children.length > 0) {
-        const batchSize = 20; // 批次大小
-        let currentBatch = 0;
-        
-        const renderBatch = () => {
-            const start = currentBatch * batchSize;
-            const end = Math.min(start + batchSize, children.length);
-            
-            for (let i = start; i < end; i++) {
-                const row = createItemRow(children[i], i);
-                fragment.appendChild(row);
-            }
-            
-            // 批量添加到DOM
-            itemsContainer.appendChild(fragment);
-            
-            currentBatch++;
-            
-            // 如果还有更多项目，使用 requestAnimationFrame 继续渲染
-            if (end < children.length) {
-                requestAnimationFrame(renderBatch);
-            } else {
-                // 渲染完成，应用黑暗模式类
-                updateDarkModeClasses();
-            }
-        };
-        
-        renderBatch();
+    } else if (children && children.length > 0) {
+        // 有子项，直接渲染
+        renderItems(children, itemsContainer);
     } else {
-        // 应用黑暗模式类
-        updateDarkModeClasses();
+        // 空内容
+        itemsContainer.innerHTML = '<p>该分类下暂无内容。</p>';
     }
+}
+
+/**
+ * 渲染项目列表
+ * @param {Array} children - 子项数据
+ * @param {HTMLElement} container - 容器元素
+ */
+function renderItems(children, container) {
+    // 清空容器
+    container.innerHTML = '';
+    
+    // 使用 DocumentFragment 优化DOM操作
+    const fragment = document.createDocumentFragment();
+    
+    // 渲染子项（批量操作）
+    const batchSize = 20; // 批次大小
+    let currentBatch = 0;
+    
+    const renderBatch = () => {
+        const start = currentBatch * batchSize;
+        const end = Math.min(start + batchSize, children.length);
+        
+        for (let i = start; i < end; i++) {
+            const row = createItemRow(children[i], i);
+            fragment.appendChild(row);
+        }
+        
+        // 批量添加到DOM
+        container.appendChild(fragment);
+        
+        currentBatch++;
+        
+        // 如果还有更多项目，使用 requestAnimationFrame 继续渲染
+        if (end < children.length) {
+            requestAnimationFrame(renderBatch);
+        } else {
+            // 渲染完成，应用黑暗模式类
+            updateDarkModeClasses();
+        }
+    };
+    
+    renderBatch();
 }
 
 /**

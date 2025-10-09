@@ -39,6 +39,10 @@ class DataManager {
             // 只构建基础树结构（不含站点数据）
             this.data = this.buildDataFromCategoriesAndSites();
             this.buildTree();
+            
+            // 立即开始预加载站点数据（异步，不阻塞页面渲染）
+            this.preloadSites();
+            
             return this.categories;
         } catch (error) {
             console.error('分类数据加载失败:', error);
@@ -47,13 +51,45 @@ class DataManager {
     }
 
     /**
-     * 异步加载 sites.csv（仅在需要时加载）
+     * 预加载站点数据（后台异步加载，不阻塞页面渲染）
+     * @returns {Promise<void>}
+     */
+    async preloadSites() {
+        try {
+            console.log('开始预加载站点数据...');
+            // 延迟500ms再开始加载，确保页面基础内容已渲染
+            setTimeout(async () => {
+                try {
+                    await this.loadSites();
+                    // 预构建完整的树形数据
+                    this.data = this.buildDataFromCategoriesAndSites();
+                    this.buildTree();
+                    console.log('站点数据预加载完成，树形数据已更新');
+                    
+                    // 触发自定义事件通知数据已准备就绪
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('sitesPreloaded', {
+                            detail: { sitesCount: this.sites.length }
+                        }));
+                    }
+                } catch (error) {
+                    console.warn('站点数据预加载失败:', error);
+                    // 预加载失败不影响基础功能
+                }
+            }, 500);
+        } catch (error) {
+            console.warn('预加载启动失败:', error);
+        }
+    }
+
+    /**
+     * 异步加载 sites.csv（支持预加载和按需加载）
      * @returns {Promise<Array>} 返回站点数据
      */
     async loadSites() {
         try {
             if (this.sites.length === 0) {
-                console.log('开始异步加载站点数据...');
+                console.log('加载站点数据...');
                 const sites = await this.loadCsv('data/sites.csv');
                 this.sites = sites.filter(site => site.visible === '1' || site.visible === 1);
                 console.log('站点数据加载完成，共加载', this.sites.length, '个站点');
@@ -66,32 +102,41 @@ class DataManager {
     }
 
     /**
-     * 获取指定分类的站点数据（按需加载）
+     * 获取指定分类的站点数据（优先使用预加载数据）
      * @param {string} categoryId - 分类ID
      * @returns {Promise<Array>} 返回该分类下的站点数据
      */
     async getSitesByCategory(categoryId) {
-        await this.loadSites(); // 确保站点数据已加载
+        // 如果站点数据还未加载，则等待加载完成
+        if (this.sites.length === 0) {
+            await this.loadSites();
+        }
         return this.sites.filter(site => site.category === categoryId);
     }
 
     /**
-     * 获取所有站点数据（按需加载）
+     * 获取所有站点数据（优先使用预加载数据）
      * @returns {Promise<Array>} 返回所有站点数据
      */
     async getAllSites() {
-        await this.loadSites(); // 确保站点数据已加载
+        // 如果站点数据还未加载，则等待加载完成
+        if (this.sites.length === 0) {
+            await this.loadSites();
+        }
         return this.sites;
     }
 
     /**
-     * 获取完整的树形数据（按需加载站点数据）
+     * 获取完整的树形数据（优先使用预加载数据）
      * @returns {Promise<Array>} 返回完整的数据
      */
     async getFullData() {
-        await this.loadSites(); // 确保站点数据已加载
-        this.data = this.buildDataFromCategoriesAndSites();
-        this.buildTree();
+        // 如果站点数据还未加载，则等待加载完成
+        if (this.sites.length === 0) {
+            await this.loadSites();
+            this.data = this.buildDataFromCategoriesAndSites();
+            this.buildTree();
+        }
         return this.data;
     }
 

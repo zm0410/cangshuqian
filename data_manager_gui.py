@@ -1284,7 +1284,18 @@ class DataManagerGUI:
         branch_frame = tk.Frame(push_win)
         branch_frame.pack(fill=tk.X, padx=20, pady=5)
         tk.Label(branch_frame, text='分支名称:', width=10, anchor='w').pack(side=tk.LEFT)
-        branch_var = tk.StringVar(value='main')
+        
+        # 自动检测当前Git分支
+        current_branch = 'main'  # 默认值
+        try:
+            result = subprocess.run(['git', 'branch', '--show-current'], 
+                                  capture_output=True, text=True, cwd=os.getcwd())
+            if result.returncode == 0 and result.stdout.strip():
+                current_branch = result.stdout.strip()
+        except Exception:
+            pass
+            
+        branch_var = tk.StringVar(value=current_branch)
         branch_entry = tk.Entry(branch_frame, textvariable=branch_var, width=20)
         branch_entry.pack(side=tk.LEFT)
         

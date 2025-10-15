@@ -1229,12 +1229,16 @@ class DataManagerGUI:
         except Exception as e:
             messagebox.showerror('导出失败', f'导出CSV文件失败: {e}')
 
-    def check_git_status(self):
+    def check_git_status(self, work_dir=None):
         """检查Git状态"""
         try:
+            # 如果没有指定工作目录，使用当前应用程序目录
+            if work_dir is None:
+                work_dir = os.path.dirname(os.path.abspath(__file__))
+            
             # 检查是否在Git仓库中
             result = subprocess.run(['git', 'rev-parse', '--is-inside-work-tree'], 
-                                  capture_output=True, text=True, cwd=os.getcwd())
+                                  capture_output=True, text=True, cwd=work_dir)
             return result.returncode == 0
         except Exception:
             return False
@@ -1411,28 +1415,28 @@ class DataManagerGUI:
                 update_progress("保存当前编辑的数据...")
                 self.save_all(silent=True)
                 
-                # 如果指定了目标文件夹，创建临时工作目录
-                temp_dir = None
+                # 使用当前Git仓库目录
+                work_dir = os.getcwd()
+                
+                # 如果指定了目标文件夹，创建该文件夹并复制文件
                 if target_folder:
                     update_progress(f"准备推送到文件夹: {target_folder}")
-                    temp_dir = tempfile.mkdtemp()
                     
-                    # 创建目标文件夹结构
-                    target_path = os.path.join(temp_dir, target_folder)
+                    # 在当前仓库中创建目标文件夹
+                    target_path = os.path.join(work_dir, target_folder)
                     os.makedirs(target_path, exist_ok=True)
                     
                     # 复制CSV文件到目标文件夹
                     shutil.copy('sites.csv', os.path.join(target_path, 'sites.csv'))
                     shutil.copy('categories.csv', os.path.join(target_path, 'categories.csv'))
                     
-                    # 切换到临时目录
-                    work_dir = temp_dir
+                    update_progress(f"✅ 文件已复制到 {target_folder}/")
                 else:
-                    work_dir = os.getcwd()
+                    update_progress("使用当前目录的CSV文件")
                 
                 # 2. 检查Git状态
                 update_progress("检查Git仓库状态...")
-                if not self.check_git_status():
+                if not self.check_git_status(work_dir):
                     update_progress("当前目录不是Git仓库，正在初始化...")
                     subprocess.run(['git', 'init'], check=True, cwd=work_dir)
                     
@@ -1628,13 +1632,7 @@ class DataManagerGUI:
             finally:
                 # 重新启用推送按钮
                 push_btn.config(state='normal')
-                # 清理临时目录
-                if temp_dir and os.path.exists(temp_dir):
-                    try:
-                        shutil.rmtree(temp_dir)
-                        update_progress("清理临时文件完成")
-                    except Exception as e:
-                        update_progress(f"清理临时文件失败: {e}")
+                update_progress("推送操作完成")
         
         # 按钮区域
         btn_frame = tk.Frame(push_win)

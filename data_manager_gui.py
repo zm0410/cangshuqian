@@ -151,6 +151,13 @@ class DataManagerGUI:
             
             # 智能刷新：分类编辑主要影响树形结构
             self.refresh_ui(tree_only=True)
+            
+            # 重新触发树选择事件以更新右侧站点列表
+            current_selection = self.tree.selection()
+            if current_selection:
+                # 如果有选中的分类，重新触发选择事件
+                self.on_tree_select(None)
+            
             edit_win.destroy()
         
         tk.Button(btn_frame, text='取消', command=edit_win.destroy).pack(side=tk.RIGHT, padx=5)
@@ -1259,59 +1266,24 @@ class DataManagerGUI:
         tk.Label(repo_frame, text='仓库地址:', width=10, anchor='w').pack(side=tk.LEFT)
         repo_url_var = tk.StringVar()
         
-        def clean_repo_url(*args):
-            """自动清理仓库地址"""
-            url = repo_url_var.get()
-            if url:
-                # 清理地址
-                clean_url = url.strip().strip('`"\'').strip()
-                if clean_url != url:
-                    repo_url_var.set(clean_url)
-        
-        repo_url_var.trace_add('write', clean_repo_url)  # 监听变化并自动清理
         repo_entry = tk.Entry(repo_frame, textvariable=repo_url_var, width=40)
         repo_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        # 示例提示
-        example_frame = tk.Frame(push_win)
-        example_frame.pack(fill=tk.X, padx=20, pady=5)
-        tk.Label(example_frame, text='示例: https://github.com/用户名/仓库名.git', 
-                fg='#666', font=('微软雅黑', 8)).pack(side=tk.LEFT)
-        tk.Label(example_frame, text='注意: 不要包含引号或反引号', 
-                fg='#ff6b6b', font=('微软雅黑', 8)).pack(side=tk.LEFT, padx=10)
         
         # 分支名称
         branch_frame = tk.Frame(push_win)
         branch_frame.pack(fill=tk.X, padx=20, pady=5)
         tk.Label(branch_frame, text='分支名称:', width=10, anchor='w').pack(side=tk.LEFT)
-        
-        # 自动检测当前Git分支
-        current_branch = 'main'  # GitHub默认主分支
-        try:
-            result = subprocess.run(['git', 'branch', '--show-current'], 
-                                  capture_output=True, text=True, cwd=os.getcwd())
-            if result.returncode == 0 and result.stdout.strip():
-                current_branch = result.stdout.strip()
-        except Exception:
-            pass
-            
-        branch_var = tk.StringVar(value=current_branch)
+        branch_var = tk.StringVar(value='main')
         branch_entry = tk.Entry(branch_frame, textvariable=branch_var, width=20)
         branch_entry.pack(side=tk.LEFT)
-        
-        # 添加分支提示
-        hint_label = tk.Label(branch_frame, text='(留空自动检测目标仓库主分支)', 
-                             font=('Arial', 8), fg='gray')
-        hint_label.pack(side=tk.LEFT, padx=(5, 0))
         
         # 目标文件夹（可选）
         folder_frame = tk.Frame(push_win)
         folder_frame.pack(fill=tk.X, padx=20, pady=5)
         tk.Label(folder_frame, text='目标文件夹:', width=10, anchor='w').pack(side=tk.LEFT)
-        folder_var = tk.StringVar()
+        folder_var = tk.StringVar(value='data')
         folder_entry = tk.Entry(folder_frame, textvariable=folder_var, width=30)
         folder_entry.pack(side=tk.LEFT)
-        tk.Label(folder_frame, text='(可选，如: data/)', fg='#666', font=('微软雅黑', 8)).pack(side=tk.LEFT, padx=5)
         
         # 提交信息
         commit_frame = tk.LabelFrame(push_win, text='提交信息', padx=10, pady=10)
@@ -1325,322 +1297,135 @@ class DataManagerGUI:
         progress_frame = tk.LabelFrame(push_win, text='推送进度', padx=10, pady=5)
         progress_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
-        progress_text = tk.Text(progress_frame, height=6, width=50)
+        progress_text = tk.Text(progress_frame, height=6, width=50, state='disabled')
         progress_text.pack(fill=tk.BOTH, expand=True)
         
         def update_progress(message):
-            """更新进度信息"""
-            progress_text.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - {message}\n")
-            progress_text.see(tk.END)
-            push_win.update()
-        
-        def validate_repo_url(url):
-            """验证仓库地址格式"""
-            if not url:
-                return False, "请输入仓库地址"
-            
-            # 清理地址中的特殊字符
-            clean_url = url.strip().strip('`"\'').strip()
-            if clean_url != url:
-                return False, f"仓库地址包含非法字符，请检查是否有多余的引号。清理后的地址: {clean_url}"
-            
-            # 支持多种格式
-            valid_patterns = [
-                r'^https://github\.com/[^/]+/[^/]+\.git$',
-                r'^https://github\.com/[^/]+/[^/]+/?$',
-                r'^git@github\.com:[^/]+/[^/]+\.git$',
-                r'^https://[^/]+\.github\.io/[^/]+\.git$'
-            ]
-            
-            for pattern in valid_patterns:
-                if re.match(pattern, url):
-                    return True, ""
-            
-            return False, "仓库地址格式不正确，请使用GitHub仓库地址"
-        
-        def do_push():
-            """执行推送操作"""
-            # 获取并清理仓库地址 - 去除各种可能的引号和空格
-            raw_url = repo_url_var.get()
-            update_progress(f"原始地址: '{raw_url}'")
-            update_progress(f"原始地址长度: {len(raw_url)}")
-            update_progress(f"原始地址ASCII码: {[ord(c) for c in raw_url]}")
-            
-            # 最激进的清理逻辑 - 只保留URL有效字符
-            repo_url = raw_url
-            
-            # 第一步：去除所有空白字符（包括不可见字符）
-            repo_url = ''.join(c for c in repo_url if not c.isspace())
-            update_progress(f"去除空白后: '{repo_url}' 长度: {len(repo_url)}")
-            
-            # 第二步：去除所有引号类字符
-            for char in ['`', '"', "'", '´', '‘', '’', '“', '”']:
-                repo_url = repo_url.replace(char, '')
-            update_progress(f"去除引号后: '{repo_url}' 长度: {len(repo_url)}")
-            
-            # 第三步：使用正则表达式提取URL
-            import re
-            url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
-            match = re.search(url_pattern, repo_url)
-            if match:
-                repo_url = match.group(0)
-                update_progress(f"正则提取后: '{repo_url}' 长度: {len(repo_url)}")
-            else:
-                # 如果没有找到URL，手动清理首尾的特殊字符
-                repo_url = repo_url.strip('`"\'´‘’“”<>{}|\\^[]')
-                update_progress(f"手动清理后: '{repo_url}' 长度: {len(repo_url)}")
-            
-            # 最终验证
-            update_progress(f"最终地址: '{repo_url}'")
-            update_progress(f"最终地址长度: {len(repo_url)}")
-            update_progress(f"最终地址是否包含反引号: {'`' in repo_url}")
-            update_progress(f"最终地址是否包含引号: {'"' in repo_url or "'" in repo_url}")
-            
-            # 强制重新检查，确保逻辑正确
-            has_backtick = '`' in repo_url
-            has_quote = '"' in repo_url or "'" in repo_url
-            if has_backtick or has_quote:
-                update_progress(f"❌ 地址仍然包含非法字符！反引号: {has_backtick}, 引号: {has_quote}")
-                # 最后的保险措施 - 如果还有问题，手动移除
-                repo_url = repo_url.replace('`', '').replace('"', '').replace("'", '')
-                update_progress(f"强制清理后: '{repo_url}'")
-            else:
-                update_progress("✅ 地址清理成功！")
-            
-            # 自动检测目标仓库的主分支
-            detected_branch = 'main'  # GitHub新仓库默认使用main
+            """线程安全的UI更新"""
+            def task():
+                progress_text.config(state='normal')
+                progress_text.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - {message}\n")
+                progress_text.see(tk.END)
+                progress_text.config(state='disabled')
+            self.root.after(0, task)
+
+        def execute_git_push(repo_url, branch, target_folder, commit_msg):
+            temp_dir = None
             try:
-                # 先尝试检测目标仓库的默认分支
-                result = subprocess.run(['git', 'ls-remote', '--symref', repo_url, 'HEAD'], 
-                                      capture_output=True, text=True, timeout=10)
-                if result.returncode == 0 and result.stdout:
-                    # 解析输出找到默认分支
-                    for line in result.stdout.split('\n'):
-                        if line.startswith('ref: refs/heads/'):
-                            detected_branch = line.split('/')[-1].strip()
-                            update_progress(f"🔍 检测到目标仓库默认分支: {detected_branch}")
-                            break
+                update_progress("开始推送流程...")
+                
+                update_progress("保存当前编辑的数据...")
+                self.save_all(silent=True)
+                
+                temp_dir = tempfile.mkdtemp()
+                update_progress(f"创建临时工作目录: {temp_dir}")
+
+                # 1. 克隆仓库
+                update_progress(f"正在从 {repo_url} 克隆分支 {branch}...")
+                clone_cmd = ['git', 'clone', '--depth', '1', '--branch', branch, repo_url, temp_dir]
+                result = subprocess.run(clone_cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=60)
+
+                if result.returncode != 0:
+                    update_progress(f"分支 {branch} 可能不存在，尝试克隆默认分支...")
+                    # 清理失败的克隆目录
+                    shutil.rmtree(temp_dir)
+                    temp_dir = tempfile.mkdtemp()
+                    
+                    clone_cmd = ['git', 'clone', '--depth', '1', repo_url, temp_dir]
+                    result = subprocess.run(clone_cmd, capture_output=True, text=True, encoding='utf-8', errors='ignore', timeout=60)
+                    if result.returncode != 0:
+                        raise subprocess.CalledProcessError(result.returncode, clone_cmd, result.stdout, result.stderr)
+                    
+                    update_progress(f"默认分支克隆成功，正在创建并切换到新分支 {branch}...")
+                    subprocess.run(['git', 'checkout', '-b', branch], check=True, cwd=temp_dir, capture_output=True, text=True)
+                
+                update_progress("✅ 仓库克隆成功")
+
+                # 2. 复制文件
+                dest_folder = os.path.join(temp_dir, target_folder)
+                os.makedirs(dest_folder, exist_ok=True)
+                update_progress(f"正在复制文件到 {dest_folder}...")
+                
+                current_dir = os.getcwd()
+                shutil.copy(os.path.join(current_dir, 'sites.csv'), os.path.join(dest_folder, 'sites.csv'))
+                shutil.copy(os.path.join(current_dir, 'categories.csv'), os.path.join(dest_folder, 'categories.csv'))
+                update_progress("✅ 文件复制完成")
+
+                # 3. Git操作
+                subprocess.run(['git', 'config', 'user.name', '数据管理工具'], check=True, cwd=temp_dir)
+                subprocess.run(['git', 'config', 'user.email', 'data-manager@example.com'], check=True, cwd=temp_dir)
+
+                update_progress("添加文件到暂存区...")
+                subprocess.run(['git', 'add', '.'], check=True, cwd=temp_dir)
+
+                status_result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True, cwd=temp_dir)
+                if not status_result.stdout.strip():
+                    update_progress("没有检测到数据变更，无需推送。")
+                    self.root.after(0, lambda: messagebox.showinfo('提示', '数据没有变更，无需推送'))
+                    return
+
+                update_progress(f"提交变更: {commit_msg}")
+                subprocess.run(['git', 'commit', '-m', commit_msg], check=True, cwd=temp_dir)
+
+                update_progress(f"推送到远程仓库 {branch} 分支...")
+                push_result = subprocess.run(['git', 'push', 'origin', branch], capture_output=True, text=True, encoding='utf-8', errors='ignore', cwd=temp_dir)
+
+                if push_result.returncode == 0:
+                    update_progress("✅ 推送成功！")
+                    success_msg = f'数据已成功推送到GitHub仓库！\n\n仓库: {repo_url}\n分支: {branch}' + (f'\n文件夹: {target_folder}' if target_folder else '')
+                    self.root.after(0, lambda: messagebox.showinfo('成功', success_msg))
                 else:
-                    # 如果无法检测远程分支，使用本地当前分支
-                    result = subprocess.run(['git', 'branch', '--show-current'], 
-                                          capture_output=True, text=True, cwd=os.getcwd())
-                    if result.returncode == 0 and result.stdout.strip():
-                        detected_branch = result.stdout.strip()
-                        update_progress(f"🔍 使用本地分支: {detected_branch}")
+                    raise subprocess.CalledProcessError(push_result.returncode, push_result.args, push_result.stdout, push_result.stderr)
+
+            except subprocess.TimeoutExpired as e:
+                error_detail = f"操作超时: {e}"
+                update_progress(f"❌ {error_detail}")
+                self.root.after(0, lambda: messagebox.showerror('推送失败', error_detail))
+            except subprocess.CalledProcessError as e:
+                error_detail = f"Git命令执行失败:\n{e.stderr or e.stdout or '未知错误'}"
+                update_progress(f"❌ {error_detail}")
+                self.root.after(0, lambda: messagebox.showerror('推送失败', error_detail))
             except Exception as e:
-                update_progress(f"⚠️ 分支检测失败，使用默认值: {e}")
-            
-            branch = branch_var.get().strip() or detected_branch
-            target_folder = folder_var.get().strip()
+                error_detail = f"推送过程中发生未知错误: {e}"
+                update_progress(f"❌ {error_detail}")
+                self.root.after(0, lambda: messagebox.showerror('错误', error_detail))
+            finally:
+                if temp_dir and os.path.exists(temp_dir):
+                    try:
+                        shutil.rmtree(temp_dir)
+                        update_progress("临时目录已清理")
+                    except Exception as e:
+                        update_progress(f"清理临时目录失败: {e}")
+                self.root.after(0, lambda: push_btn.config(state='normal'))
+                update_progress("推送操作完成")
+
+        def start_push_thread():
+            repo_url = repo_url_var.get().strip().strip('`"\'')
+            branch = branch_var.get().strip() or 'main'
+            target_folder = folder_var.get().strip() or 'data'
             commit_msg = commit_text.get('1.0', tk.END).strip()
-            
-            # 验证输入
-            is_valid, error_msg = validate_repo_url(repo_url)
-            if not is_valid:
-                messagebox.showerror('错误', error_msg)
+
+            if not repo_url:
+                messagebox.showerror('错误', "请输入仓库地址")
                 return
-            
             if not commit_msg:
                 messagebox.showerror('错误', '请输入提交信息')
                 return
             
-            # 禁用推送按钮
             push_btn.config(state='disabled')
             
-            try:
-                update_progress("开始推送流程...")
-                
-                # 1. 保存当前数据
-                update_progress("保存当前编辑的数据...")
-                self.save_all(silent=True)
-                
-                # 创建临时工作目录用于Git操作
-                import tempfile
-                temp_dir = tempfile.mkdtemp()
-                work_dir = temp_dir
-                update_progress(f"创建临时工作目录: {work_dir}")
-                
-                try:
-                    # 如果指定了目标文件夹，在临时目录中创建该文件夹
-                    if target_folder:
-                        update_progress(f"准备推送到文件夹: {target_folder}")
-                        target_path = os.path.join(work_dir, target_folder)
-                        os.makedirs(target_path, exist_ok=True)
-                        
-                        # 复制CSV文件到目标文件夹
-                        current_dir = os.getcwd()
-                        shutil.copy(os.path.join(current_dir, 'sites.csv'), 
-                                  os.path.join(target_path, 'sites.csv'))
-                        shutil.copy(os.path.join(current_dir, 'categories.csv'), 
-                                  os.path.join(target_path, 'categories.csv'))
-                        
-                        update_progress(f"✅ 文件已复制到临时目录 {target_folder}/")
-                    else:
-                        # 直接复制CSV文件到临时目录根目录
-                        update_progress("复制CSV文件到临时目录")
-                        current_dir = os.getcwd()
-                        shutil.copy(os.path.join(current_dir, 'sites.csv'), 
-                                  os.path.join(work_dir, 'sites.csv'))
-                        shutil.copy(os.path.join(current_dir, 'categories.csv'), 
-                                  os.path.join(work_dir, 'categories.csv'))
-                        update_progress("✅ 文件已复制到临时目录")
-                    
-                    # 2. 初始化Git仓库
-                    update_progress("初始化临时Git仓库...")
-                    subprocess.run(['git', 'init'], check=True, cwd=work_dir)
-                    
-                    # 2.1 设置初始分支名称为目标分支
-                    update_progress(f"设置分支名称为: {branch}")
-                    try:
-                        # 如果Git版本支持，直接设置初始分支名
-                        subprocess.run(['git', 'checkout', '-b', branch], 
-                                     check=True, cwd=work_dir)
-                    except subprocess.CalledProcessError:
-                        # 如果失败，使用传统方法
-                        subprocess.run(['git', 'branch', '-m', branch], 
-                                     check=True, cwd=work_dir)
-                    
-                    # 3. 设置远程仓库
-                    update_progress(f"设置远程仓库: {repo_url}")
-                    subprocess.run(['git', 'remote', 'add', 'origin', repo_url], 
-                                 check=True, cwd=work_dir)
-                    
-                    # 4. 设置Git配置
-                    update_progress("设置Git配置...")
-                    subprocess.run(['git', 'config', 'user.name', '数据管理工具'], 
-                                 check=True, cwd=work_dir)
-                    subprocess.run(['git', 'config', 'user.email', 'data-manager@example.com'], 
-                                 check=True, cwd=work_dir)
-                    
-                    # 5. 添加文件到暂存区
-                    update_progress("添加CSV文件到Git...")
-                    if target_folder:
-                        # 添加目标文件夹中的文件
-                        subprocess.run(['git', 'add', target_folder], 
-                                     check=True, cwd=work_dir)
-                    else:
-                        # 添加根目录文件
-                        subprocess.run(['git', 'add', 'sites.csv', 'categories.csv'], 
-                                     check=True, cwd=work_dir)
-                    
-                    # 6. 检查是否有变更
-                    update_progress("检查文件变更...")
-                    result = subprocess.run(['git', 'diff', '--cached', '--quiet'], 
-                                          capture_output=True, cwd=work_dir)
-                    
-                    if result.returncode == 0:
-                        update_progress("没有检测到数据变更")
-                        messagebox.showinfo('提示', '数据没有变更，无需推送')
-                        return
-                    
-                    # 7. 提交变更
-                    update_progress(f"提交变更: {commit_msg}")
-                    subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                 check=True, cwd=work_dir)
-                    
-                    # 8. 推送到远程仓库
-                    update_progress(f"推送到远程仓库 {branch} 分支...")
-                    result = subprocess.run(['git', 'push', '-u', 'origin', branch], 
-                                          capture_output=True, text=True, cwd=work_dir)
-                    
-                    if result.returncode == 0:
-                        update_progress("✅ 推送成功！")
-                        update_progress(f"数据已成功推送到: {repo_url}")
-                        if target_folder:
-                            update_progress(f"文件位置: {target_folder}/sites.csv 和 {target_folder}/categories.csv")
-                        messagebox.showinfo('成功', f'数据已成功推送到GitHub仓库！\n\n仓库: {repo_url}\n分支: {branch}' + (f'\n文件夹: {target_folder}' if target_folder else ''))
-                    else:
-                        error_detail = result.stderr
-                        update_progress(f"❌ 推送失败: {error_detail}")
-                        messagebox.showerror('推送失败', f'推送到GitHub失败:\n\n{error_detail}')
-                
-                except subprocess.CalledProcessError as e:
-                    error_msg = f"Git命令执行失败: {e}"
-                    update_progress(f"❌ {error_msg}")
-                    messagebox.showerror('错误', error_msg)
-                except Exception as e:
-                    error_msg = f"推送过程中发生错误: {e}"
-                    update_progress(f"❌ {error_msg}")
-                    messagebox.showerror('错误', error_msg)
-                finally:
-                    # 清理临时目录
-                    try:
-                        shutil.rmtree(temp_dir)
-                        update_progress("临时目录已清理")
-                    except Exception as e:
-                        update_progress(f"清理临时目录失败: {e}")
-                    
-                    # 7. 检查是否有变更
-                    update_progress("检查文件变更...")
-                    result = subprocess.run(['git', 'diff', '--cached', '--quiet'], 
-                                          capture_output=True, cwd=work_dir)
-                    
-                    if result.returncode == 0:
-                        update_progress("没有检测到数据变更")
-                        messagebox.showinfo('提示', '数据没有变更，无需推送')
-                        return
-                    
-                    # 8. 提交变更
-                    update_progress(f"提交变更: {commit_msg}")
-                    subprocess.run(['git', 'commit', '-m', commit_msg], 
-                                 check=True, cwd=work_dir)
-                    
-                    # 9. 推送到远程仓库
-                    update_progress(f"推送到远程仓库 {branch} 分支...")
-                    result = subprocess.run(['git', 'push', '-u', 'origin', branch], 
-                                          capture_output=True, text=True, cwd=work_dir)
-                    
-                    if result.returncode == 0:
-                        update_progress("✅ 推送成功！")
-                        update_progress(f"数据已成功推送到: {repo_url}")
-                        if target_folder:
-                            update_progress(f"文件位置: {target_folder}/sites.csv 和 {target_folder}/categories.csv")
-                        messagebox.showinfo('成功', f'数据已成功推送到GitHub仓库！\n\n仓库: {repo_url}\n分支: {branch}' + (f'\n文件夹: {target_folder}' if target_folder else ''))
-                    else:
-                        error_detail = result.stderr
-                        update_progress(f"❌ 推送失败: {error_detail}")
-                        messagebox.showerror('推送失败', f'推送到GitHub失败:\n\n{error_detail}')
-                
-                except subprocess.CalledProcessError as e:
-                    error_msg = f"Git命令执行失败: {e}"
-                    update_progress(f"❌ {error_msg}")
-                    messagebox.showerror('错误', error_msg)
-                except Exception as e:
-                    error_msg = f"推送过程中发生错误: {e}"
-                    update_progress(f"❌ {error_msg}")
-                    messagebox.showerror('错误', error_msg)
-                finally:
-                    # 清理临时目录
-                    try:
-                        shutil.rmtree(temp_dir)
-                        update_progress("临时目录已清理")
-                    except Exception as e:
-                        update_progress(f"清理临时目录失败: {e}")
-            
-            except Exception as outer_e:
-                error_msg = f"推送流程失败: {outer_e}"
-                update_progress(f"❌ {error_msg}")
-                messagebox.showerror('错误', error_msg)
-            finally:
-                # 重新启用推送按钮
-                push_btn.config(state='normal')
-                update_progress("推送操作完成")
-        
+            thread = threading.Thread(target=execute_git_push, args=(repo_url, branch, target_folder, commit_msg), daemon=True)
+            thread.start()
+
         # 按钮区域
         btn_frame = tk.Frame(push_win)
         btn_frame.pack(fill=tk.X, padx=10, pady=10)
         
-        push_btn = tk.Button(btn_frame, text='开始推送', command=lambda: threading.Thread(target=do_push, daemon=True).start(), 
+        push_btn = tk.Button(btn_frame, text='开始推送', command=start_push_thread, 
                            bg='#4caf50', fg='white', font=('微软雅黑', 10))
         push_btn.pack(side=tk.RIGHT, padx=5)
         
         tk.Button(btn_frame, text='取消', command=push_win.destroy).pack(side=tk.RIGHT, padx=5)
-        
-        # 帮助信息
-        help_frame = tk.Frame(push_win)
-        help_frame.pack(fill=tk.X, padx=20, pady=5)
-        tk.Label(help_frame, text='提示: 首次推送需要设置GitHub Personal Access Token', 
-                fg='#666', font=('微软雅黑', 8)).pack(side=tk.LEFT)
         
         # 聚焦到输入框
         repo_entry.focus()
